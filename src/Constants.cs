@@ -21,6 +21,11 @@ namespace FESight
         public const int KI_USED_START_ADDRESS = 0x1503;
         public const int KI_USED_BYTES_LENGTH = 3;
 
+        public const int OBJECTIVES_START_COORDS_X = 10;
+        public const int OBJECTIVES_START_COORDS_Y = 200;
+        public const int OBJECTIVES_HEIGHT = 12;
+        public const int OBJECTIVES_LABEL_PADDING = 20;
+
         public const string CARTROM_STRING = "CARTROM";
         public const string WRAM_STRING = "WRAM";
     }

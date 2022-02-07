@@ -18,6 +18,7 @@ namespace FESight
 				
 		private readonly Label _locationsLabel;
 		private readonly Label _objectivesLabel;
+		private List<CheckBox> _objectivesCheckboxes;
 		private readonly Label _oLocationsLabel;
 		private readonly Label _uLocationsLabel;
 		private readonly Label _mLocationsLabel;
@@ -40,9 +41,10 @@ namespace FESight
 
 			Controls.Add(_objectivesLabel = new Label());
 			_objectivesLabel.AutoSize = true;
-			_objectivesLabel.Location = new Point(10, 200);
+			_objectivesLabel.Location = new Point(Constants.OBJECTIVES_START_COORDS_X, Constants.OBJECTIVES_START_COORDS_Y);
 			_objectivesLabel.ForeColor = Color.White;
 			_objectivesLabel.Text = "Objectives:";
+			_objectivesCheckboxes = new List<CheckBox>();
 
 			Controls.Add(_oLocationsLabel = new Label());
 			_oLocationsLabel.AutoSize = true;
@@ -89,6 +91,28 @@ namespace FESight
 			ResumeLayout();
 		}
 
+		private void SetObjectives(Metadata metadata)
+		{
+			if (_objectivesCheckboxes.Count > 0)
+				return;
+
+			int currentY = Constants.OBJECTIVES_START_COORDS_Y;
+			int labelX = Constants.OBJECTIVES_START_COORDS_X + Constants.OBJECTIVES_LABEL_PADDING;
+
+			foreach (var objective in metadata.objectives)
+            {
+				currentY += 20;
+				CheckBox objectiveCheckbox = new CheckBox();
+				objectiveCheckbox.Location = new Point(Constants.OBJECTIVES_START_COORDS_X, currentY);
+				objectiveCheckbox.ForeColor = Color.White;
+				objectiveCheckbox.AutoSize = true;
+				objectiveCheckbox.Text = objective;
+
+				_objectivesCheckboxes.Add(objectiveCheckbox);
+				Controls.Add(objectiveCheckbox);
+            }
+        }
+
 		private void UpdateKeyItems()
 		{
 			if (KeyItems.KeyItemsInitialized == false)
@@ -121,7 +145,7 @@ namespace FESight
 				}
 			}
 
-			APIs.Memory.UseMemoryDomain("WRAM");
+			APIs.Memory.UseMemoryDomain(Constants.WRAM_STRING);
 
 			var bytes = APIs.Memory.ReadByteRange(0x1500, 3);
 			BitArray kiFlags = new BitArray(bytes.ToArray());
@@ -162,9 +186,9 @@ namespace FESight
 
 		public override void Restart()
 		{
-			Flags.SetFlags(GetMetadata());
-
-			DisplayOutput();
+			Metadata metadata = GetMetadata();
+			Flags.SetFlags(metadata);
+			SetObjectives(metadata);
 		}
 
 		protected override void UpdateAfter()
