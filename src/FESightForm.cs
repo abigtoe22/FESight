@@ -16,16 +16,28 @@ namespace FESight
 	{
 		public ApiContainer? _maybeAPIContainer { get; set; }
 				
-		private readonly Label _locationsLabel;
 		private readonly Label _objectivesLabel;
 		private List<CheckBox> _objectivesCheckboxes;
+		private readonly Label _locationsLabel;
 		private readonly Label _oLocationsLabel;
 		private readonly Label _uLocationsLabel;
 		private readonly Label _mLocationsLabel;
 		private readonly Label _oLocationsLabelChecked;
 		private readonly Label _uLocationsLabelChecked;
 		private readonly Label _mLocationsLabelChecked;
+		private readonly Label _trapsLabel;
+		private readonly Label _oTrapsLabel;
+		private readonly Label _uTrapsLabel;
+		private readonly Label _mTrapsLabel;
+		private readonly Label _oTrapsLabelChecked;
+		private readonly Label _uTrapsLabelChecked;
+		private readonly Label _mTrapsLabelChecked;
+		private readonly Label _hookClearedLabel;
+
+		private string romHash;
+		private string romName;
 		private int KICount;
+		private bool _hookCleared;
 
 		private readonly Label _debug;
 
@@ -46,58 +58,103 @@ namespace FESight
 			_objectivesLabel.Text = "Objectives:";
 			_objectivesCheckboxes = new List<CheckBox>();
 
+			Controls.Add(_locationsLabel = new Label());
+			_locationsLabel.AutoSize = true;
+			_locationsLabel.Location = new Point(Constants.LOCATIONS_START_COORD_X, Constants.LOCATIONS_START_COORD_Y);
+			_locationsLabel.ForeColor = Color.White;
+			_locationsLabel.Text = "Locations";
+
 			Controls.Add(_oLocationsLabel = new Label());
 			_oLocationsLabel.AutoSize = true;
-			_oLocationsLabel.Location = new Point(200, 0);
-			_oLocationsLabel.ForeColor = Color.White;
-			_oLocationsLabel.Text = "oLocations";
+			_oLocationsLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
 
 			Controls.Add(_uLocationsLabel = new Label());
 			_uLocationsLabel.AutoSize = true;
-			_uLocationsLabel.Location = new Point(200, 20);
-			_uLocationsLabel.ForeColor = Color.White;
-			_uLocationsLabel.Text = "uLocations";
+			_uLocationsLabel.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
 
 			Controls.Add(_mLocationsLabel = new Label());
 			_mLocationsLabel.AutoSize = true;
-			_mLocationsLabel.Location = new Point(200, 30);
-			_mLocationsLabel.ForeColor = Color.White;
-			_mLocationsLabel.Text = "mLocations";
+			_mLocationsLabel.ForeColor = Constants.MOON_LOCATIONS_COLOR;
 
 			Controls.Add(_oLocationsLabelChecked = new Label());
 			_oLocationsLabelChecked.AutoSize = true;
-			_oLocationsLabelChecked.Location = new Point(200, 40);
-			_oLocationsLabelChecked.ForeColor = Color.White;
-			_oLocationsLabelChecked.Text = "oLocationsChecked";
+			_oLocationsLabelChecked.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
 
 			Controls.Add(_uLocationsLabelChecked = new Label());
 			_uLocationsLabelChecked.AutoSize = true;
-			_uLocationsLabelChecked.Location = new Point(200, 50);
-			_uLocationsLabelChecked.ForeColor = Color.White;
-			_uLocationsLabelChecked.Text = "uLocationsChecked";
+			_uLocationsLabelChecked.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
 
 			Controls.Add(_mLocationsLabelChecked = new Label());
 			_mLocationsLabelChecked.AutoSize = true;
-			_mLocationsLabelChecked.Location = new Point(200, 60);
-			_mLocationsLabelChecked.ForeColor = Color.White;
-			_mLocationsLabelChecked.Text = "mLocationsChecked";
+			_mLocationsLabelChecked.ForeColor = Constants.MOON_LOCATIONS_COLOR;
 
-			Controls.Add(_debug = new Label());
-			_debug.Location = new Point(400, 0);
-			_debug.AutoSize = true;
-			_debug.ForeColor = Color.White;
-			
+			Controls.Add(_trapsLabel = new Label());
+			_trapsLabel.AutoSize = true;
+			_trapsLabel.ForeColor = Color.White;
 
-			ResumeLayout();
+			Controls.Add(_oTrapsLabel = new Label());
+			_oTrapsLabel.AutoSize = true;
+			_oTrapsLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
+
+			Controls.Add(_uTrapsLabel = new Label());
+			_uTrapsLabel.AutoSize = true;
+			_uTrapsLabel.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
+
+			Controls.Add(_mTrapsLabel = new Label());
+			_mTrapsLabel.AutoSize = true;
+			_mTrapsLabel.ForeColor = Constants.MOON_LOCATIONS_COLOR;
+
+			Controls.Add(_oTrapsLabelChecked = new Label());
+			_oTrapsLabelChecked.AutoSize = true;
+			_oTrapsLabelChecked.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
+
+			Controls.Add(_uTrapsLabelChecked = new Label());
+			_uTrapsLabelChecked.AutoSize = true;
+			_uTrapsLabelChecked.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
+
+			Controls.Add(_mTrapsLabelChecked = new Label());
+			_mTrapsLabelChecked.AutoSize = true;
+			_mTrapsLabelChecked.ForeColor = Constants.MOON_LOCATIONS_COLOR;
+
+			Controls.Add(_hookClearedLabel = new Label());
+			_hookClearedLabel.AutoSize = true;
+			_hookClearedLabel.ForeColor = Constants.HOOK_CLEAR_LABEL_COLOR;
+			_hookClearedLabel.Click += hookButtonClick;
+			_hookClearedLabel.Visible = false;
+
+            // TODO: Proper DEBUG compiler stuff
+            Controls.Add(_debug = new Label());
+            _debug.Location = new Point(400, 0);
+            _debug.AutoSize = true;
+            _debug.ForeColor = Color.White;
+
+
+            ResumeLayout();
 		}
+
+		private void hookButtonClick(object sender, EventArgs e)
+        {
+			if (_hookClearedLabel != null)
+            {
+				_hookCleared = true;
+            }
+        }
 
 		private void SetObjectives(Metadata metadata)
 		{
-			if (_objectivesCheckboxes.Count > 0)
+			if(romHash == metadata.binary_flags + metadata.seed)
 				return;
 
+			romHash = metadata.binary_flags + metadata.seed;
+
+			foreach(var objectiveCheckbox in _objectivesCheckboxes)
+            {
+				Controls.Remove(objectiveCheckbox);
+            }
+			_objectivesCheckboxes.Clear();
+
+
 			int currentY = Constants.OBJECTIVES_START_COORDS_Y;
-			int labelX = Constants.OBJECTIVES_START_COORDS_X + Constants.OBJECTIVES_LABEL_PADDING;
 
 			foreach (var objective in metadata.objectives)
             {
@@ -131,8 +188,7 @@ namespace FESight
                     {
 						y = y + ICON_SPACE;
 						x = 0;
-					}
-						
+					}						
 
 					keyItem.PictureBox = new PictureBox();
 					keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
@@ -182,64 +238,120 @@ namespace FESight
             {
 				bool hasBeenChecked = location.HasBeenChecked(locFlags);
             }
+
+			int currentX = Constants.LOCATIONS_START_COORD_X;
+			int currentY = Constants.LOCATIONS_START_COORD_Y + Constants.LOCATIONS_LABEL_HEADING_PADDING;
+
+			List<KILocation> overworldLocations = KILocations.ListOfKILocations.Where
+				(
+					p => p.LocationArea == KILocationArea.Overworld &&
+					p.LocationFlagType != KILocationFlagType.Trap &&
+					p.Checked == false &&
+					p.IsAvailable(_hookCleared)
+				)
+				.ToList();
+
+			List<KILocation> underworldLocations = KILocations.ListOfKILocations.Where
+				(
+					p => p.LocationArea == KILocationArea.Underground &&
+					p.LocationFlagType != KILocationFlagType.Trap &&
+					p.Checked == false &&
+					p.IsAvailable(_hookCleared)
+				)
+				.ToList();
+
+			List<KILocation> moonLocations = KILocations.ListOfKILocations.Where
+				(
+					p => p.LocationArea == KILocationArea.Moon &&
+					p.LocationFlagType != KILocationFlagType.Trap &&
+					p.Checked == false &&
+					p.IsAvailable(_hookCleared)
+				)
+				.ToList();
+
+			_oLocationsLabel.Location = new Point(currentX, currentY);
+			string tempLocationsText = "";
+			foreach (var location in overworldLocations)
+            {
+				tempLocationsText += "\n" + location.Name;
+            }
+			_oLocationsLabel.Text = tempLocationsText;
+
+			bool displayHookLabel = _hookCleared == false && (KeyItems.Hook.Obtained || Flags.OtherPushBToJump);
+
+			if (displayHookLabel)
+			{
+				_hookClearedLabel.Location = new Point(currentX, currentY + _oLocationsLabel.Size.Height);
+				_hookClearedLabel.Text = "Clear Hook Route";
+				_hookClearedLabel.Visible = true;				
+			}
+			else
+			{
+				_hookClearedLabel.Visible = false;
+			}
+
+			_uLocationsLabel.Location = new Point(currentX, currentY + _oLocationsLabel.Size.Height);
+
+			tempLocationsText = "";
+			foreach (var location in underworldLocations)
+			{
+				tempLocationsText += "\n" + location.Name;
+			}
+			_uLocationsLabel.Text = tempLocationsText;
+
+			_mLocationsLabel.Location = new Point(currentX, currentY + _oLocationsLabel.Size.Height + _uLocationsLabel.Size.Height);
+			tempLocationsText = "";
+			foreach (var location in moonLocations)
+			{
+				tempLocationsText += "\n" + location.Name;
+			}
+			_mLocationsLabel.Text = tempLocationsText;
+
+			// TODO: Checked Locations
 		}
 
+		// Called on ROM start or restart
 		public override void Restart()
 		{
 			Metadata metadata = GetMetadata();
 			Flags.SetFlags(metadata);
 			SetObjectives(metadata);
+
+			_trapsLabel.Text = String.Empty;
+			_trapsLabel.Location = new Point();
+
+			if (Flags.Ktrap)
+            {
+				_trapsLabel.Location = new Point(Constants.TRAPS_START_COORD_X, Constants.TRAPS_START_COORD_Y);
+				_trapsLabel.Text = "Trapped Chests";
+			}
+
+			_hookCleared = false;
 		}
 
+		// Called after every frame
 		protected override void UpdateAfter()
 		{
 			if (APIs.Emulation.FrameCount() % 60 == 0)
-				DisplayOutput();
+				UpdateDisplay();
 		}
 
-		private void DisplayOutput()
+		private void UpdateDisplay()
         {
-			//_flagsLabel.Text = ReadKeyItems();
-			_debug.Text = Debug();
-			UpdateLocations();
+			//_debug.Text = Debug();
 			UpdateKeyItems();
-        }
+			UpdateLocations();
+		}
 
-        private string Debug()
+		private string Debug()
         {
 			string output = "Debug: \n";
 
-			//Debug stuff!
-			output += "Flags:";
-			output += "\nKmain: " + Flags.Kmain;
-			output += "\nKsummon: " + Flags.Ksummon;
-			output += "\nKmoon: " + Flags.Kmoon;
-			output += "\nKtrap: " + Flags.Ktrap;
-			output += "\nKunsafe: " + Flags.Kunsafe;
-			output += "\nKunsafer: " + Flags.Kunsafer;
-			output += "\n-pushbtojump: " + Flags.OtherPushBToJump;
-			//End debug stuff.
+			// Debug stuff!
+
+			// End debug stuff.
 
 			return output;
-		}
-
-        public static string PrintValues(IEnumerable myList, int myWidth)
-		{
-			string result = "";
-			int i = myWidth;
-			foreach (Object obj in myList)
-			{
-				if (i <= 0)
-				{
-					i = myWidth;
-					result += "\r\n";
-				}
-				i--;
-				result += string.Format("{0,8}", obj);
-			}
-			result += "\r\n";
-
-			return result;
 		}
 
 		private Metadata GetMetadata()
@@ -294,8 +406,18 @@ namespace FESight
 			return result;
 		}
 
-		
-	}
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // FESightForm
+            // 
+            this.ClientSize = new System.Drawing.Size(420, 261);
+            this.Name = "FESightForm";
+            this.ResumeLayout(false);
+
+        }
+    }
 
 
 }

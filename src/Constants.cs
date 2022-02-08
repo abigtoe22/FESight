@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,21 @@ namespace FESight
         public const int OBJECTIVES_START_COORDS_Y = 200;
         public const int OBJECTIVES_HEIGHT = 12;
         public const int OBJECTIVES_LABEL_PADDING = 20;
+
+        public const int LOCATIONS_START_COORD_X = 300;
+        public const int LOCATIONS_START_COORD_Y = 0;
+        public const int LOCATIONS_HEIGHT = 12;
+        public const int LOCATIONS_LABEL_HEADING_PADDING = 10;
+
+        public const int TRAPS_START_COORD_X = 400;
+        public const int TRAPS_START_COORD_Y = 0;
+        public const int TRAPS_HEIGHT = 12;
+        public const int TRAPS_LABEL_HEADING_PADDING = 10;
+
+        public static Color OVERWORLD_LOCATIONS_COLOR = Color.FromArgb(0, 255, 153);
+        public static Color UNDERGROUND_LOCATIONS_COLOR = Color.FromArgb(255, 0, 153);
+        public static Color MOON_LOCATIONS_COLOR = Color.FromArgb(0, 153, 255);
+        public static Color HOOK_CLEAR_LABEL_COLOR = Color.FromArgb(0, 153, 153);
 
         public const string CARTROM_STRING = "CARTROM";
         public const string WRAM_STRING = "WRAM";
