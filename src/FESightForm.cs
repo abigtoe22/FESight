@@ -362,7 +362,7 @@ namespace FESight
 
 
 			_oTrapsLabel.Location = new Point(currentX, currentY);
-			string tempTrapText = "stuff";
+			string tempTrapText = "";
 
 			if(showOverworldTraps)
             {
