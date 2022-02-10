@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -34,12 +35,15 @@ namespace FESight
 		private readonly Label _mTrapsLabelChecked;
 		private readonly Label _hookClearedLabel;
 
+		private readonly Stopwatch _stopWatch;
 		private readonly Label _stopWatchLabel;
 		private readonly Button _stopWatchStartButton;
 		private readonly Button _stopWatchPauseButton;
 		private readonly Button _stopWatchRestartButton;
 
-		private string romHash;
+		public readonly PictureBox _dMistPictureBox;
+
+		private string _romHash;
 		private bool _hookCleared;
 
 		private readonly Label _debug;
@@ -135,6 +139,7 @@ namespace FESight
 			_hookClearedLabel.Click += hookButtonClick;
 			_hookClearedLabel.Visible = false;
 
+			_stopWatch = new Stopwatch();
 			Controls.Add(_stopWatchLabel = new Label());
 			_stopWatchLabel.AutoSize = true;
 			_stopWatchLabel.Location = new Point(10, ClientSize.Height - 110);
@@ -147,22 +152,27 @@ namespace FESight
 			_stopWatchStartButton.Text = "Start";
 			_stopWatchStartButton.BackColor = Color.White;
 			_stopWatchStartButton.Width = 60;
+			_stopWatchStartButton.Click += StartStopWatch;
 
 			Controls.Add(_stopWatchPauseButton = new Button());
 			_stopWatchPauseButton.Location = new Point(_stopWatchStartButton.Location.X + _stopWatchStartButton.Size.Width + 10, _stopWatchStartButton.Location.Y);
 			_stopWatchPauseButton.Text = "Pause";
 			_stopWatchPauseButton.BackColor = Color.White;
 			_stopWatchPauseButton.Width = _stopWatchStartButton.Width;
+			_stopWatchPauseButton.Click += PauseStopWatch;
 
 			Controls.Add(_stopWatchRestartButton = new Button());
 			_stopWatchRestartButton.Location = new Point(_stopWatchPauseButton.Location.X + _stopWatchPauseButton.Size.Width + 10, _stopWatchPauseButton.Location.Y);
 			_stopWatchRestartButton.Text = "Restart";
 			_stopWatchRestartButton.BackColor = Color.White;
 			_stopWatchRestartButton.Width = _stopWatchStartButton.Width;
+			_stopWatchRestartButton.Click += RestartStopWatch;
+
+			Controls.Add(_dMistPictureBox = new PictureBox());
 
 			// TODO: Proper DEBUG compiler stuff
 			Controls.Add(_debug = new Label());
-            _debug.Location = new Point(400, 0);
+            _debug.Location = new Point(400, 400);
             _debug.AutoSize = true;
             _debug.ForeColor = Constants.FORM_FONT_COLOR;
 
@@ -180,10 +190,10 @@ namespace FESight
 
 		private void SetObjectives(Metadata metadata)
 		{
-			if(romHash == metadata.binary_flags + metadata.seed)
+			if(_romHash == metadata.binary_flags + metadata.seed)
 				return;
 
-			romHash = metadata.binary_flags + metadata.seed;
+			_romHash = metadata.binary_flags + metadata.seed;
 
 			foreach(var objectiveCheckbox in _objectivesCheckboxes)
             {
@@ -207,7 +217,35 @@ namespace FESight
 				_objectivesCheckboxes.Add(objectiveCheckbox);
 				Controls.Add(objectiveCheckbox);
             }
-        }
+
+			if (Flags.Knofree)
+			{
+				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Gray.png";
+				_dMistPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+				_dMistPictureBox.Location = new Point(0, 160);
+				_dMistPictureBox.Click += ClickDMist;
+				Controls.Add(_dMistPictureBox);
+			}
+			else
+            {
+				Controls.Remove(_dMistPictureBox);
+            }
+
+			if (Flags.Ktrap)
+            {
+				Controls.Add(_trapsLabel);
+				Controls.Add(_oTrapsLabel);
+				Controls.Add(_uTrapsLabel);
+				Controls.Add(_mTrapsLabel);
+			}
+			else
+			{
+				Controls.Remove(_trapsLabel);
+				Controls.Remove(_oTrapsLabel);
+				Controls.Remove(_uTrapsLabel);
+				Controls.Remove(_mTrapsLabel);
+			}
+		}
 
 		private void UpdateKeyItems()
 		{
@@ -227,15 +265,22 @@ namespace FESight
                     {
 						y = y + ICON_SPACE;
 						x = 0;
-					}						
+					}
+
+					if (keyItem.Name == "Rat Tail")
+                    {
+						x = x + ICON_SPACE;
+					}
+						
 
 					keyItem.PictureBox = new PictureBox();
 					keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
 					keyItem.PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
 					keyItem.PictureBox.Location = new Point(x, y);
 					Controls.Add(keyItem.PictureBox);
-
+					
 					x = x + ICON_SPACE;
+	
 					count++;
 				}
 			}
@@ -476,6 +521,7 @@ namespace FESight
 		private void UpdateDisplay()
         {
 			//_debug.Text = Debug();
+			UpdateStopWatch();
 			UpdateKeyItems();
 			UpdateLocations();
 
@@ -526,7 +572,7 @@ namespace FESight
 			}
 		}
 
-		//Assuming little endian. Anything this runs on is going to be little endian.
+		// Assuming little endian. Anything this runs on is going to be little endian.
 		private int GetIntFromBytes(byte[] data)
 		{
 			if (data.Length > 4)
@@ -546,6 +592,45 @@ namespace FESight
 			return result;
 		}
 
+		private void StartStopWatch(object sender, EventArgs e)
+        {
+			_stopWatch.Start();
+        }
+
+		private void PauseStopWatch(object sender, EventArgs e)
+        {
+			_stopWatch.Stop();
+        }
+
+		private void RestartStopWatch(object sender, EventArgs e)
+        {
+			_stopWatch.Restart();
+			_stopWatch.Stop();
+        }
+
+		private void UpdateStopWatch()
+        {
+			_stopWatchLabel.Text = _stopWatch.Elapsed.Hours.ToString().PadLeft(1, '0')
+				+ ":" + _stopWatch.Elapsed.Minutes.ToString().PadLeft(2, '0')
+				+ ":" + _stopWatch.Elapsed.Seconds.ToString().PadLeft(2, '0');
+		}
+
+		private void ClickDMist(object sender, EventArgs e)
+        {
+			if(KILocations.DMistChecked)
+            {
+				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Gray.png";
+				KILocations.DMistChecked = false;
+
+			}
+			else
+            {
+				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Color.png";
+				KILocations.DMistChecked = true;
+			}
+		}
+
+		// Not used unless I decide to use the forms designer
         private void InitializeComponent()
         {
             this.SuspendLayout();

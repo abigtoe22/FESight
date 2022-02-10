@@ -43,6 +43,20 @@ namespace FESight
 		{
 			bool kIsRequiredObtained = true;
 
+			if (Name == "Troia Castle" && Flags.Knofree)
+				return false;
+
+			if(Name == "Mist Village")
+            {
+				if (Flags.Knofree == false)
+					return false;
+
+				if (KILocations.DMistChecked)
+					return true;
+
+				return false;
+            }
+
 			foreach (var item in GatingKeyItems)
             {
 				if (hookCleared && item.Name == "Magma Key")
@@ -100,6 +114,7 @@ namespace FESight
 	public static class KILocations
 	{
 		public static bool KILocationsInitialized { get; set; }
+		public static bool DMistChecked { get; set; }
 		public static List<KILocation> ListOfKILocations { get; set; }
 
 		//Main

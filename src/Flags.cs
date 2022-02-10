@@ -179,6 +179,8 @@ namespace FESight
                         Kmain = true;
                     if (keyItemFlags.Contains("trap"))
                         Ktrap = true;
+                    if (keyItemFlags.Contains("nofree"))
+                        Knofree = true;
                     if (keyItemFlags.Contains("unsafe"))
                         Kunsafe = true;
                     if (keyItemFlags.Contains("unsafer"))
