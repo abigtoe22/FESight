@@ -52,18 +52,27 @@ namespace FESight
 					kIsRequiredObtained = false;
             }
 
-			if(PushBToJumpSkip && Flags.OtherPushBToJump && hookCleared)
+			if(Flags.OtherPushBToJump)
             {
-				if(GatingKeyItems.Count > 1 && GatingKeyItems.Where(p => p.Name == "Magma Key").Any())
+				if (PushBToJumpSkip == true)
+					return true;
+
+
+                if (hookCleared)
                 {
-					foreach(var item in GatingKeyItems.Where(p => p.Name != "Magma Key").ToList())
+                    if (GatingKeyItems.Count > 1 && GatingKeyItems.Where(p => p.Name == "Magma Key").Any())
                     {
-						if (item.Obtained == false)
-							return false;
+                        foreach (var item in GatingKeyItems.Where(p => p.Name != "Magma Key").ToList())
+                        {
+                            if (item.Obtained == false)
+                                return false;
+                        }
+
+                        return true;
                     }
                 }
-				return true;
             }
+
 
 			return kIsRequiredObtained;
 		}
@@ -290,17 +299,57 @@ namespace FESight
 
 			if(trapFlag)
             {
+				TrapChestAreas.ListOfAreas = new List<TrapChestArea>();
+
+				TrapChestArea zot = new TrapChestArea("Tower of Zot", KILocationArea.Overworld);
+				zot.TrapChests.Add(TrapZot);
+				TrapChestAreas.ListOfAreas.Add(zot);
 				ListOfKILocations.Add(TrapZot);
+
+				TrapChestArea eblan = new TrapChestArea("Castle Eblan", KILocationArea.Overworld);
+				eblan.TrapChests.Add(TrapEblan1);
+				eblan.TrapChests.Add(TrapEblan2);
+				eblan.TrapChests.Add(TrapEblan3);
+				TrapChestAreas.ListOfAreas.Add(eblan);
 				ListOfKILocations.Add(TrapEblan1);
 				ListOfKILocations.Add(TrapEblan2);
 				ListOfKILocations.Add(TrapEblan3);
+
+				TrapChestArea lowerbabil = new TrapChestArea("Lower Babil", KILocationArea.Underground);
+				lowerbabil.TrapChests.Add(TrapLowerBabil1);
+				lowerbabil.TrapChests.Add(TrapLowerBabil2);
+				lowerbabil.TrapChests.Add(TrapLowerBabil3);
+				lowerbabil.TrapChests.Add(TrapLowerBabil4);
+				TrapChestAreas.ListOfAreas.Add(lowerbabil);
 				ListOfKILocations.Add(TrapLowerBabil1);
 				ListOfKILocations.Add(TrapLowerBabil2);
 				ListOfKILocations.Add(TrapLowerBabil3);
 				ListOfKILocations.Add(TrapLowerBabil4);
+
+				TrapChestArea caveEblan = new TrapChestArea("Cave Eblan", KILocationArea.Overworld);
+				caveEblan.TrapChests.Add(TrapCaveEblan);
+				TrapChestAreas.ListOfAreas.Add(caveEblan);
 				ListOfKILocations.Add(TrapCaveEblan);
+
+				TrapChestArea upperBabil = new TrapChestArea("Upper Babil", KILocationArea.Overworld);
+				upperBabil.TrapChests.Add(TrapUpperBabil);
+				TrapChestAreas.ListOfAreas.Add(upperBabil);
 				ListOfKILocations.Add(TrapUpperBabil);
+
+				TrapChestArea feymarch = new TrapChestArea("Feymarch", KILocationArea.Underground);
+				feymarch.TrapChests.Add(TrapFeymarch);
+				TrapChestAreas.ListOfAreas.Add(feymarch);
 				ListOfKILocations.Add(TrapFeymarch);
+
+				TrapChestArea sylphCave = new TrapChestArea("Sylph Cave", KILocationArea.Underground);
+				sylphCave.TrapChests.Add(TrapSylph1);
+				sylphCave.TrapChests.Add(TrapSylph2);
+				sylphCave.TrapChests.Add(TrapSylph3);
+				sylphCave.TrapChests.Add(TrapSylph4);
+				sylphCave.TrapChests.Add(TrapSylph5);
+				sylphCave.TrapChests.Add(TrapSylph6);
+				sylphCave.TrapChests.Add(TrapSylph7);
+				TrapChestAreas.ListOfAreas.Add(sylphCave);
 				ListOfKILocations.Add(TrapSylph1);
 				ListOfKILocations.Add(TrapSylph2);
 				ListOfKILocations.Add(TrapSylph3);
@@ -308,11 +357,30 @@ namespace FESight
 				ListOfKILocations.Add(TrapSylph5);
 				ListOfKILocations.Add(TrapSylph6);
 				ListOfKILocations.Add(TrapSylph7);
+
+				TrapChestArea giant = new TrapChestArea("Giant of Babil", KILocationArea.Overworld);
+				giant.TrapChests.Add(TrapGiant);
+				TrapChestAreas.ListOfAreas.Add(giant);
 				ListOfKILocations.Add(TrapGiant);
+
+				TrapChestArea lunarPath = new TrapChestArea("Lunar Parth", KILocationArea.Moon);
+				lunarPath.TrapChests.Add(TrapLunarPath);
+				TrapChestAreas.ListOfAreas.Add(lunarPath);
 				ListOfKILocations.Add(TrapLunarPath);
 
 				if(moonFlag || unSafeFlag)
                 {
+					TrapChestArea lunarCore = new TrapChestArea("Lunar Subterrane", KILocationArea.Moon);
+					lunarCore.TrapChests.Add(TrapLunarCore1);
+					lunarCore.TrapChests.Add(TrapLunarCore2);
+					lunarCore.TrapChests.Add(TrapLunarCore3);
+					lunarCore.TrapChests.Add(TrapLunarCore4);
+					lunarCore.TrapChests.Add(TrapLunarCore5);
+					lunarCore.TrapChests.Add(TrapLunarCore6);
+					lunarCore.TrapChests.Add(TrapLunarCore7);
+					lunarCore.TrapChests.Add(TrapLunarCore8);
+					lunarCore.TrapChests.Add(TrapLunarCore9);
+					TrapChestAreas.ListOfAreas.Add(lunarCore);
 					ListOfKILocations.Add(TrapLunarCore1);
 					ListOfKILocations.Add(TrapLunarCore2);
 					ListOfKILocations.Add(TrapLunarCore3);
