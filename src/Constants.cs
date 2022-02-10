@@ -22,6 +22,9 @@ namespace FESight
         public const int KI_USED_START_ADDRESS = 0x1503;
         public const int KI_USED_BYTES_LENGTH = 3;
 
+        public const int CLIENT_SIZE_X = 800;
+        public const int CLIENT_SIZE_Y = 650;
+
         public const int OBJECTIVES_START_COORDS_X = 10;
         public const int OBJECTIVES_START_COORDS_Y = 210;
         public const int OBJECTIVES_HEIGHT = 12;

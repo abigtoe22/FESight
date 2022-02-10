@@ -34,9 +34,12 @@ namespace FESight
 		private readonly Label _mTrapsLabelChecked;
 		private readonly Label _hookClearedLabel;
 
+		private readonly Label _stopWatchLabel;
+		private readonly Button _stopWatchStartButton;
+		private readonly Button _stopWatchPauseButton;
+		private readonly Button _stopWatchRestartButton;
+
 		private string romHash;
-		private string romName;
-		private int KICount;
 		private bool _hookCleared;
 
 		private readonly Label _debug;
@@ -47,7 +50,7 @@ namespace FESight
 
 		public FESightForm()
 		{
-			ClientSize = new Size(1000, 450);
+			ClientSize = new Size(Constants.CLIENT_SIZE_X, Constants.CLIENT_SIZE_Y);
 			this.BackColor = System.Drawing.Color.FromArgb(0, 0, 99);
 			SuspendLayout();
 			
@@ -132,8 +135,33 @@ namespace FESight
 			_hookClearedLabel.Click += hookButtonClick;
 			_hookClearedLabel.Visible = false;
 
-            // TODO: Proper DEBUG compiler stuff
-            Controls.Add(_debug = new Label());
+			Controls.Add(_stopWatchLabel = new Label());
+			_stopWatchLabel.AutoSize = true;
+			_stopWatchLabel.Location = new Point(10, ClientSize.Height - 110);
+			_stopWatchLabel.ForeColor = Constants.FORM_FONT_COLOR;
+			_stopWatchLabel.Font = new Font(new FontFamily("Helvetica"), 40f);
+			_stopWatchLabel.Text = "0:00:00";
+
+			Controls.Add(_stopWatchStartButton = new Button());
+			_stopWatchStartButton.Location = new Point(_stopWatchLabel.Location.X, _stopWatchLabel.Location.Y + 70);
+			_stopWatchStartButton.Text = "Start";
+			_stopWatchStartButton.BackColor = Color.White;
+			_stopWatchStartButton.Width = 60;
+
+			Controls.Add(_stopWatchPauseButton = new Button());
+			_stopWatchPauseButton.Location = new Point(_stopWatchStartButton.Location.X + _stopWatchStartButton.Size.Width + 10, _stopWatchStartButton.Location.Y);
+			_stopWatchPauseButton.Text = "Pause";
+			_stopWatchPauseButton.BackColor = Color.White;
+			_stopWatchPauseButton.Width = _stopWatchStartButton.Width;
+
+			Controls.Add(_stopWatchRestartButton = new Button());
+			_stopWatchRestartButton.Location = new Point(_stopWatchPauseButton.Location.X + _stopWatchPauseButton.Size.Width + 10, _stopWatchPauseButton.Location.Y);
+			_stopWatchRestartButton.Text = "Restart";
+			_stopWatchRestartButton.BackColor = Color.White;
+			_stopWatchRestartButton.Width = _stopWatchStartButton.Width;
+
+			// TODO: Proper DEBUG compiler stuff
+			Controls.Add(_debug = new Label());
             _debug.Location = new Point(400, 0);
             _debug.AutoSize = true;
             _debug.ForeColor = Constants.FORM_FONT_COLOR;
