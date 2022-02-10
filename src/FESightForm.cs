@@ -134,7 +134,7 @@ namespace FESight
 
             // TODO: Proper DEBUG compiler stuff
             Controls.Add(_debug = new Label());
-            _debug.Location = new Point(400, 0);
+            _debug.Location = new Point(Constants.DEBUG_OUTOUT_COORD_X, Constants.DEBUG_OUTOUT_COORD_Y);
             _debug.AutoSize = true;
             _debug.ForeColor = Constants.FORM_FONT_COLOR;
 
@@ -446,13 +446,14 @@ namespace FESight
 		}
 
 		private void UpdateDisplay()
-        {
-			//_debug.Text = Debug();
+        {	
 			UpdateKeyItems();
 			UpdateLocations();
 
 			if(Flags.Ktrap)
 				UpdateTraps();
+
+			_debug.Text = Debug();
 		}
 
 		private string Debug()
@@ -460,7 +461,9 @@ namespace FESight
 			string output = "Debug: \n";
 
 			// Debug stuff!
-
+			KeyItems.Hook.Obtained = true;
+			output += "_hookCleared: " + _hookCleared;
+			output += "\nshowHookLabel: " + (_hookCleared == false && (KeyItems.Hook.Obtained || Flags.OtherPushBToJump));
 			// End debug stuff.
 
 			return output;

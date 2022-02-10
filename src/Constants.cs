@@ -27,6 +27,9 @@ namespace FESight
         public const int OBJECTIVES_HEIGHT = 12;
         public const int OBJECTIVES_LABEL_PADDING = 20;
 
+        public const int DEBUG_OUTOUT_COORD_X = 500;
+        public const int DEBUG_OUTOUT_COORD_Y = 500;
+
         public const int LOCATIONS_START_COORD_X = 400;
         public const int LOCATIONS_START_COORD_Y = 0;
         public const int LOCATIONS_HEIGHT = 12;
