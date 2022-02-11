@@ -202,10 +202,18 @@ namespace FESight
 			BaronCastleKing = new KILocation("Baron Castle King", "0x0025", KILocationFlagType.Main, new List<KeyItem> { KeyItems.BaronKey }, true, KILocationArea.Overworld);
 			EdwardToroia = new KILocation("Troia Castle", "0x0026", KILocationFlagType.Main, new List<KeyItem>(), true, KILocationArea.Overworld);
 			CaveMagnes = new KILocation("Cave Magnes", "0x0027", KILocationFlagType.Main, new List<KeyItem> { KeyItems.TwinHarp }, true, KILocationArea.Overworld);
-			TowerOfZot = new KILocation("Tower of Zot", "0x0028", KILocationFlagType.Main, new List<KeyItem> { KeyItems.EarthCrystal }, false, KILocationArea.Underground);
+			TowerOfZot = new KILocation("Tower of Zot", "0x0028", KILocationFlagType.Main, new List<KeyItem> { KeyItems.EarthCrystal }, false, KILocationArea.Overworld);
 			LowerBabilBoss = new KILocation("Lower Babil Boss", "0x0029", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey }, false, KILocationArea.Underground);
 			SuperCannon = new KILocation("Lower Babil Super Cannon", "0x002A", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey, KeyItems.TowerKey }, false, KILocationArea.Underground);
-			DwarfCastle = new KILocation("Dwarf Castle", "0x002B", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey }, false, KILocationArea.Underground);
+			
+			if(Flags.Gwarp == false)
+            {
+				DwarfCastle = new KILocation("Dwarf Castle", "0x002B", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey }, false, KILocationArea.Underground);
+			}
+			else
+            {
+				DwarfCastle = new KILocation("Dwarf/Warp", "0x002B", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey }, false, KILocationArea.Underground);
+			}
 			SealedCave = new KILocation("Sealed Cave", "0x002C", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey, KeyItems.LucaKey }, false, KILocationArea.Underground);
 			FeymarchChest = new KILocation("Feymarch Chest", "0x002D", KILocationFlagType.Main, new List<KeyItem> { KeyItems.MagmaKey }, false, KILocationArea.Underground);
 			AdamantCave = new KILocation("Adamant Cave", "0x002E", KILocationFlagType.Main, new List<KeyItem> { KeyItems.Hook, KeyItems.RatTail }, false, KILocationArea.Overworld);

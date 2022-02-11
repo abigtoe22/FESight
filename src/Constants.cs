@@ -35,6 +35,12 @@ namespace FESight
         public const int LOCATIONS_HEIGHT = 12;
         public const int LOCATIONS_LABEL_HEADING_PADDING = 10;
 
+        public const int KI_TOTAL_LABEL_X = 120;
+        public const int KI_TOTAL_LABEL_Y = 170;
+
+        public const int DMIST_LABEL_X = 0;
+        public const int DMIST_LABEL_Y = 160;
+
         public const int TRAPS_START_COORD_X = 650;
         public const int TRAPS_START_COORD_Y = 0;
         public const int TRAPS_HEIGHT = 12;

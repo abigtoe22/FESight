@@ -41,7 +41,8 @@ namespace FESight
 		private readonly Button _stopWatchPauseButton;
 		private readonly Button _stopWatchRestartButton;
 
-		public readonly PictureBox _dMistPictureBox;
+		private Label _kiTotalLabel;
+		private PictureBox _dMistPictureBox;
 
 		private string _romHash;
 		private bool _hookCleared;
@@ -51,9 +52,11 @@ namespace FESight
 		private ApiContainer APIs => _maybeAPIContainer!;
 
 		protected override string WindowTitleStatic => "FE Sight";
+        public override bool BlocksInputWhenFocused { get { return false; } }
 
-		public FESightForm()
+        public FESightForm()
 		{
+
 			ClientSize = new Size(Constants.CLIENT_SIZE_X, Constants.CLIENT_SIZE_Y);
 			this.BackColor = System.Drawing.Color.FromArgb(0, 0, 99);
 			SuspendLayout();
@@ -169,6 +172,10 @@ namespace FESight
 			_stopWatchRestartButton.Click += RestartStopWatch;
 
 			Controls.Add(_dMistPictureBox = new PictureBox());
+			Controls.Add(_kiTotalLabel = new Label());
+			_kiTotalLabel.Location = new Point(Constants.KI_TOTAL_LABEL_X, Constants.KI_TOTAL_LABEL_Y);
+			_kiTotalLabel.Font = Constants.FORM_FONT;
+			_kiTotalLabel.ForeColor = Constants.FORM_FONT_COLOR;
 
 			// TODO: Proper DEBUG compiler stuff
 			Controls.Add(_debug = new Label());
@@ -220,9 +227,11 @@ namespace FESight
 
 			if (Flags.Knofree)
 			{
+				Controls.Remove(_dMistPictureBox);
+				_dMistPictureBox = new PictureBox();
 				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Gray.png";
 				_dMistPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
-				_dMistPictureBox.Location = new Point(0, 160);
+				_dMistPictureBox.Location = new Point(Constants.DMIST_LABEL_X, Constants.DMIST_LABEL_Y);
 				_dMistPictureBox.Click += ClickDMist;
 				Controls.Add(_dMistPictureBox);
 			}
@@ -307,6 +316,7 @@ namespace FESight
 				keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
             }
 
+			_kiTotalLabel.Text = KeyItems.KeyItemList.Where(p => p.Name != "<Warp Glitch>" && p.Obtained).Count() + " / " + 17;
 		}
 
 		private void UpdateLocations()
