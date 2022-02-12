@@ -49,13 +49,15 @@ namespace FESight
 
 		private readonly Label _debug;
 
-		private ApiContainer APIs => _maybeAPIContainer!;
+		internal ApiContainer APIs => _maybeAPIContainer!;
 
 		protected override string WindowTitleStatic => "FE Sight";
         public override bool BlocksInputWhenFocused { get { return false; } }
 
         public FESightForm()
 		{
+			FESight.InitBeforeRomLoad();
+			InitKeyItemIcons();
 
 			ClientSize = new Size(Constants.CLIENT_SIZE_X, Constants.CLIENT_SIZE_Y);
 			this.BackColor = System.Drawing.Color.FromArgb(0, 0, 99);
@@ -187,6 +189,41 @@ namespace FESight
             ResumeLayout();
 		}
 
+        private void InitKeyItemIcons()
+        {
+			int ICON_SPACE = 40;
+
+			int count = 0;
+			int x = 0;
+			int y = 0;
+
+			foreach (var keyItem in KeyItems.KeyItemList)
+			{
+				if (count % 4 == 0 && count != 0)
+				{
+					y = y + ICON_SPACE;
+					x = 0;
+				}
+
+				if (keyItem.Name == "Rat Tail")
+				{
+					x = x + ICON_SPACE;
+				}
+
+
+				keyItem.PictureBox = new PictureBox();
+				keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
+				keyItem.PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+				keyItem.PictureBox.Location = new Point(x, y);
+				Controls.Add(keyItem.PictureBox);
+
+				x = x + ICON_SPACE;
+
+				count++;
+			}
+
+		}
+
 		private void hookButtonClick(object sender, EventArgs e)
         {
 			if (_hookClearedLabel != null)
@@ -197,11 +234,7 @@ namespace FESight
 
 		private void SetObjectives(Metadata metadata)
 		{
-			if(_romHash == metadata.binary_flags + metadata.seed)
-				return;
-
-			_romHash = metadata.binary_flags + metadata.seed;
-
+		
 			foreach(var objectiveCheckbox in _objectivesCheckboxes)
             {
 				Controls.Remove(objectiveCheckbox);
@@ -241,8 +274,7 @@ namespace FESight
             }
 
 			if (Flags.Ktrap)
-            {
-				TrapChestAreas.ListOfAreas = new List<TrapChestArea>();
+            {				
 				Controls.Add(_trapsLabel);
 				Controls.Add(_oTrapsLabel);
 				Controls.Add(_uTrapsLabel);
@@ -262,12 +294,14 @@ namespace FESight
 		{
 			APIs.Memory.UseMemoryDomain(Constants.WRAM_STRING);
 
-			var bytes = APIs.Memory.ReadByteRange(0x1500, 3);
+			List<byte> bytes;
+
+			bytes = APIs.Memory.ReadByteRange(0x1500, 3);
 			BitArray kiFlags = new BitArray(bytes.ToArray());
-			foreach(var keyItem in KeyItems.KeyItemList)
-            {
+			foreach (var keyItem in KeyItems.KeyItemList)
+			{
 				keyItem.Obtained = kiFlags[keyItem.MemoryIndex];
-            }
+			}
 
 
             bytes = APIs.Memory.ReadByteRange(0x1503, 3);
@@ -277,21 +311,16 @@ namespace FESight
                 keyItem.Used = usageFlags[keyItem.MemoryIndex];
             }
 
-            foreach (var keyItem in KeyItems.KeyItemList)
-            {
+			foreach (var keyItem in KeyItems.KeyItemList)
+			{
 				keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
-            }
+			}
 
 			_kiTotalLabel.Text = KeyItems.KeyItemList.Where(p => p.Name != "<Warp Glitch>" && p.Obtained).Count() + " / " + 17;
 		}
 
 		private void UpdateLocations()
         {
-			if (KILocations.KILocationsInitialized == false)
-			{
-				KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);
-            }
-
 			var bytes = APIs.Memory.ReadByteRange(0x1510, 15);
 			BitArray locFlags = new BitArray(bytes.ToArray());
 			foreach(var location in KILocations.ListOfKILocations)
@@ -303,13 +332,13 @@ namespace FESight
 			int currentY = Constants.LOCATIONS_START_COORD_Y + Constants.LOCATIONS_LABEL_HEADING_PADDING;
 
 			List<KILocation> overworldLocations = KILocations.ListOfKILocations.Where
-				(
-					p => p.LocationArea == KILocationArea.Overworld &&
-					p.LocationFlagType != KILocationFlagType.Trap &&
-					p.Checked == false &&
-					p.IsAvailable(_hookCleared)
-				)
-				.ToList();
+			(
+				p => p.LocationArea == KILocationArea.Overworld &&
+				p.LocationFlagType != KILocationFlagType.Trap &&
+				p.Checked == false &&
+				p.IsAvailable(_hookCleared)
+			)
+			.ToList();
 
 			List<KILocation> underworldLocations = KILocations.ListOfKILocations.Where
 				(
@@ -470,10 +499,12 @@ namespace FESight
 
 		// Called on ROM start or restart
 		public override void Restart()
-		{
-			Metadata metadata = GetMetadata();
+		{			
+			Metadata metadata = FESight.GetMetadata(APIs);
 
-			if(_romHash == metadata.binary_flags + metadata.seed)
+			FESight.CurrentRomHash = metadata.binary_flags + metadata.seed;
+
+			if(FESight.CurrentRomHash == metadata.binary_flags + metadata.seed)
             {
 				InitializeOnRestartNewROM(metadata);
             }			
@@ -483,43 +514,8 @@ namespace FESight
 
         private void InitializeOnRestart(Metadata metadata)
         {
-			if (KeyItems.KeyItemsInitialized == false)
-			{
-				int ICON_SPACE = 40;
-
-				int count = 0;
-				int x = 0;
-				int y = 0;
-
-				KeyItems.InitializeKeyItems();
-
-				foreach (var keyItem in KeyItems.KeyItemList)
-				{
-					if (count % 4 == 0 && count != 0)
-					{
-						y = y + ICON_SPACE;
-						x = 0;
-					}
-
-					if (keyItem.Name == "Rat Tail")
-					{
-						x = x + ICON_SPACE;
-					}
-
-
-					keyItem.PictureBox = new PictureBox();
-					keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
-					keyItem.PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
-					keyItem.PictureBox.Location = new Point(x, y);
-					Controls.Add(keyItem.PictureBox);
-
-					x = x + ICON_SPACE;
-
-					count++;
-				}
-			}
-
-
+			FESight.InitBeforeAnyFrame(APIs);
+			KeyItems.InitializeKeyItems();
 
 			_trapsLabel.Text = String.Empty;
 			_trapsLabel.Location = new Point();
@@ -535,16 +531,18 @@ namespace FESight
 
 		private void InitializeOnRestartNewROM(Metadata metadata)
         {
-			Flags.SetFlags(metadata);
+			FESight.InitOnRestartNewRom(metadata);
 			SetObjectives(metadata);
-
 		}
 
 		// Called after every frame
 		protected override void UpdateAfter()
 		{
 			if (APIs.Emulation.FrameCount() % 60 == 0)
+            {
+				FESight.InitBeforeAnyFrame(APIs);
 				UpdateDisplay();
+			}	
 		}
 
 		private void UpdateDisplay()
@@ -567,58 +565,6 @@ namespace FESight
 			// End debug stuff.
 
 			return output;
-		}
-
-		private Metadata GetMetadata()
-        {
-			bool worked = APIs.Memory.UseMemoryDomain(Constants.CARTROM_STRING);
-			string jsonString = "";
-
-			if (worked)
-			{
-                try
-                {
-					var bytes = APIs.Memory.ReadByteRange(Constants.FLAGS_LENGTH_ADDRESS, Constants.FLAGS_LENGTH_LENGTH);
-					bytes.Reverse();
-
-					int jsonLength = GetIntFromBytes(bytes.ToArray());
-					var jsonBytes = APIs.Memory.ReadByteRange(Constants.FLAGS_START_ADDRESS, jsonLength);
-					jsonString = System.Text.Encoding.ASCII.GetString(jsonBytes.ToArray());
-					Metadata metadata = JsonConvert.DeserializeObject<Metadata>(jsonString);
-
-					return metadata;
-
-				}
-				catch (Exception ex)
-                {
-
-                    throw new Exception("Error reading metadata. JSON String: " + jsonString + " -- Inner Exception: " + ex.Message);
-                }
-			}
-			else
-			{
-				throw new Exception("Can't read CARTROM memory domain.");
-			}
-		}
-
-		// Assuming little endian. Anything this runs on is going to be little endian.
-		private int GetIntFromBytes(byte[] data)
-		{
-			if (data.Length > 4)
-				throw new Exception("Can't get int from a byte array with more than 4 bytes.");
-
-			if (data.Length < 4)
-			{
-				int empties = 4 - data.Length;
-				for (int i = 0; i < empties; i++)
-				{
-					data = data.Prepend(new byte()).ToArray();
-				}
-			}
-
-			Array.Reverse(data);
-			int result = BitConverter.ToInt32(data, 0);
-			return result;
 		}
 
 		private void StartStopWatch(object sender, EventArgs e)

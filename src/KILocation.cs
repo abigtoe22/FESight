@@ -41,60 +41,69 @@ namespace FESight
 
 		public bool IsAvailable(bool hookCleared)
 		{
-			bool kIsRequiredObtained = true;
-
-			if (Name == "Troia Castle" && Flags.Knofree)
-				return false;
-
-			if(Name == "Mist Village")
+            try
             {
-				if (Flags.Knofree == false)
+				bool kIsRequiredObtained = true;
+
+				if (Name == "Troia Castle" && Flags.Knofree)
 					return false;
 
-				if (KILocations.DMistChecked)
-					return true;
+				if (Name == "Mist Village")
+				{
+					if (Flags.Knofree == false)
+						return false;
 
-				return false;
-            }
+					if (KILocations.DMistChecked)
+						return true;
 
-			if(Name.Contains("Lunar Subterrane Trap"))
-            {
-				if ((Flags.Kmoon || Flags.Kunsafe || Flags.Kunsafer) == false)
 					return false;
-            }				
+				}
 
-			foreach (var item in GatingKeyItems)
+				if (Name.Contains("Lunar Subterrane Trap"))
+				{
+					if ((Flags.Kmoon || Flags.Kunsafe || Flags.Kunsafer) == false)
+						return false;
+				}
+
+				foreach (var item in GatingKeyItems)
+				{
+					if (hookCleared && item.Name == "Magma Key")
+						continue;
+
+					if (item.Obtained == false)
+						kIsRequiredObtained = false;
+				}
+
+				if (Flags.OtherPushBToJump)
+				{
+					if (PushBToJumpSkip == true)
+						return true;
+
+
+					if (hookCleared)
+					{
+						if (GatingKeyItems.Count > 1 && GatingKeyItems.Where(p => p.Name == "Magma Key").Any())
+						{
+							foreach (var item in GatingKeyItems.Where(p => p.Name != "Magma Key").ToList())
+							{
+								if (item.Obtained == false)
+									return false;
+							}
+
+							return true;
+						}
+					}
+				}
+
+
+				return kIsRequiredObtained;
+
+			}
+			catch (Exception)
             {
-				if (hookCleared && item.Name == "Magma Key")
-					continue;
 
-				if(item.Obtained == false)
-					kIsRequiredObtained = false;
+                throw new Exception(this.Name);
             }
-
-			if(Flags.OtherPushBToJump)
-            {
-				if (PushBToJumpSkip == true)
-					return true;
-
-
-                if (hookCleared)
-                {
-                    if (GatingKeyItems.Count > 1 && GatingKeyItems.Where(p => p.Name == "Magma Key").Any())
-                    {
-                        foreach (var item in GatingKeyItems.Where(p => p.Name != "Magma Key").ToList())
-                        {
-                            if (item.Obtained == false)
-                                return false;
-                        }
-
-                        return true;
-                    }
-                }
-            }
-
-
-			return kIsRequiredObtained;
 		}
 
 
@@ -198,6 +207,9 @@ namespace FESight
 
 		public static void InitializeKILocations(bool objectiveFlag, bool mainFlag, bool summonFlag, bool moonFlag, bool trapFlag, bool unSafeFlag, bool noFreeFlag)
         {
+			if (KILocationsInitialized)
+				return;
+
 			ListOfKILocations = new List<KILocation>();
 			
 			StartingItem = new KILocation("Starting Item", "0x0020", KILocationFlagType.Main, new List<KeyItem>(), true, KILocationArea.Overworld);
@@ -425,7 +437,7 @@ namespace FESight
 				ListOfKILocations.Add(ObjectiveCompletion);
             }
 
-
+			KILocationsInitialized = true;
         }
 	}
 }

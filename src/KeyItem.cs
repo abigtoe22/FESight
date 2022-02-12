@@ -74,6 +74,9 @@ namespace FESight
 
         public static void InitializeKeyItems()
         {
+            if (KeyItemsInitialized)
+                return;
+
             Crystal = new KeyItem("Crystal", "1THECrystal", 16);
             Pass = new KeyItem("Pass", "2Pass", 17);
             Hook = new KeyItem("Hook", "3Hook", 8);
