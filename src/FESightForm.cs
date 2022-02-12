@@ -242,10 +242,12 @@ namespace FESight
 
 			if (Flags.Ktrap)
             {
+				TrapChestAreas.ListOfAreas = new List<TrapChestArea>();
 				Controls.Add(_trapsLabel);
 				Controls.Add(_oTrapsLabel);
 				Controls.Add(_uTrapsLabel);
 				Controls.Add(_mTrapsLabel);
+				
 			}
 			else
 			{
@@ -258,42 +260,6 @@ namespace FESight
 
 		private void UpdateKeyItems()
 		{
-			if (KeyItems.KeyItemsInitialized == false)
-			{
-				int ICON_SPACE = 40;
-
-				int count = 0;
-				int x = 0;
-				int y = 0;
-
-				KeyItems.InitializeKeyItems();
-
-				foreach(var keyItem in KeyItems.KeyItemList)
-                {					
-					if (count % 4 == 0 && count != 0)
-                    {
-						y = y + ICON_SPACE;
-						x = 0;
-					}
-
-					if (keyItem.Name == "Rat Tail")
-                    {
-						x = x + ICON_SPACE;
-					}
-						
-
-					keyItem.PictureBox = new PictureBox();
-					keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
-					keyItem.PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
-					keyItem.PictureBox.Location = new Point(x, y);
-					Controls.Add(keyItem.PictureBox);
-					
-					x = x + ICON_SPACE;
-	
-					count++;
-				}
-			}
-
 			APIs.Memory.UseMemoryDomain(Constants.WRAM_STRING);
 
 			var bytes = APIs.Memory.ReadByteRange(0x1500, 3);
@@ -322,9 +288,9 @@ namespace FESight
 		private void UpdateLocations()
         {
 			if (KILocations.KILocationsInitialized == false)
-            {
+			{
 				KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);
-			}				
+            }
 
 			var bytes = APIs.Memory.ReadByteRange(0x1510, 15);
 			BitArray locFlags = new BitArray(bytes.ToArray());
@@ -506,19 +472,72 @@ namespace FESight
 		public override void Restart()
 		{
 			Metadata metadata = GetMetadata();
-			Flags.SetFlags(metadata);
-			SetObjectives(metadata);
+
+			if(_romHash == metadata.binary_flags + metadata.seed)
+            {
+				InitializeOnRestartNewROM(metadata);
+            }			
+			
+			InitializeOnRestart(metadata);
+		}
+
+        private void InitializeOnRestart(Metadata metadata)
+        {
+			if (KeyItems.KeyItemsInitialized == false)
+			{
+				int ICON_SPACE = 40;
+
+				int count = 0;
+				int x = 0;
+				int y = 0;
+
+				KeyItems.InitializeKeyItems();
+
+				foreach (var keyItem in KeyItems.KeyItemList)
+				{
+					if (count % 4 == 0 && count != 0)
+					{
+						y = y + ICON_SPACE;
+						x = 0;
+					}
+
+					if (keyItem.Name == "Rat Tail")
+					{
+						x = x + ICON_SPACE;
+					}
+
+
+					keyItem.PictureBox = new PictureBox();
+					keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
+					keyItem.PictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+					keyItem.PictureBox.Location = new Point(x, y);
+					Controls.Add(keyItem.PictureBox);
+
+					x = x + ICON_SPACE;
+
+					count++;
+				}
+			}
+
+
 
 			_trapsLabel.Text = String.Empty;
 			_trapsLabel.Location = new Point();
 
 			if (Flags.Ktrap)
-            {
+			{
 				_trapsLabel.Location = new Point(Constants.TRAPS_START_COORD_X, Constants.TRAPS_START_COORD_Y);
 				_trapsLabel.Text = "Trapped Chests";
 			}
 
 			_hookCleared = false;
+		}
+
+		private void InitializeOnRestartNewROM(Metadata metadata)
+        {
+			Flags.SetFlags(metadata);
+			SetObjectives(metadata);
+
 		}
 
 		// Called after every frame

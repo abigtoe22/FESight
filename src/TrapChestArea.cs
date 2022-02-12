@@ -11,6 +11,8 @@ namespace FESight
         public string Name { get; set; }
         public List<KILocation> TrapChests { get; set; }
         public KILocationArea AreaMap { get; set; }
+        public int Total { get; set; }
+        public int Current { get; set; }
 
         public TrapChestArea(string name, KILocationArea areaMap)
         {

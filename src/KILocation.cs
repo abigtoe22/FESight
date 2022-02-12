@@ -57,6 +57,12 @@ namespace FESight
 				return false;
             }
 
+			if(Name.Contains("Lunar Subterrane Trap"))
+            {
+				if ((Flags.Kmoon || Flags.Kunsafe || Flags.Kunsafer) == false)
+					return false;
+            }				
+
 			foreach (var item in GatingKeyItems)
             {
 				if (hookCleared && item.Name == "Magma Key")
@@ -322,8 +328,6 @@ namespace FESight
 
 			if(trapFlag)
             {
-				TrapChestAreas.ListOfAreas = new List<TrapChestArea>();
-
 				TrapChestArea zot = new TrapChestArea("Tower of Zot", KILocationArea.Overworld);
 				zot.TrapChests.Add(TrapZot);
 				TrapChestAreas.ListOfAreas.Add(zot);
