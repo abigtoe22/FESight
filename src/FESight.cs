@@ -21,19 +21,20 @@ namespace FESight
             TrapChestAreas.ListOfAreas = new List<TrapChestArea>();
         }
 
-        internal static void InitBeforeAnyFrame(ApiContainer api)
+        internal static void InitBeforeAnyFrame()
         {
             if (InitializedBeforeFrames)
                 return;
 
-            Metadata metadata = GetMetadata(api);
-            CurrentMetaData = metadata;
-            CurrentRomHash = metadata.binary_flags + metadata.seed;
             KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);
         }
 
-        internal static void InitOnRestartNewRom(Metadata metadata)
+        internal static void InitOnRestartNewRom(ApiContainer api)
         {
+            Metadata metadata = GetMetadata(api);
+            CurrentMetaData = metadata;
+            CurrentRomHash = metadata.binary_flags + metadata.seed;
+
             Flags.SetFlags(metadata);
         }
 

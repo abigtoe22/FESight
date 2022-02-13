@@ -41,10 +41,13 @@ namespace FESight
 		private readonly Button _stopWatchPauseButton;
 		private readonly Button _stopWatchRestartButton;
 
+		private List<Label> _oTrapLabels;
+		private List<Label> _uTrapLabels;
+		private List<Label> _mTrapLabels;
+
 		private Label _kiTotalLabel;
 		private PictureBox _dMistPictureBox;
 
-		private string _romHash;
 		private bool _hookCleared;
 
 		private readonly Label _debug;
@@ -275,18 +278,44 @@ namespace FESight
 
 			if (Flags.Ktrap)
             {				
-				Controls.Add(_trapsLabel);
-				Controls.Add(_oTrapsLabel);
-				Controls.Add(_uTrapsLabel);
-				Controls.Add(_mTrapsLabel);
 				
+				Controls.Add(_trapsLabel);
+				//Controls.Add(_oTrapsLabel);
+				//Controls.Add(_uTrapsLabel);
+				//Controls.Add(_mTrapsLabel);
+				_oTrapLabels = new List<Label>();
+				List<TrapChestArea> oAreas = TrapChestAreas.ListOfAreas.Where(p => p.AreaMap == KILocationArea.Overworld).ToList();
+				int currentTrapsX = Constants.TRAPS_START_COORD_X;
+				int currentTrapsY = Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING;
+
+				Label myLabel = new Label();
+				myLabel.Text = "Test Overworld Trap";
+				myLabel.Location = new Point(currentTrapsX, currentTrapsY);
+				myLabel.Font = Constants.FORM_FONT;
+				myLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
+				myLabel.AutoSize = true;
+				_oTrapLabels.Add(myLabel);
+				Controls.Add(myLabel);
+
+
+				foreach (var area in oAreas)
+                {
+					Label newLabel = new Label();
+					newLabel.Text = area.Name;
+					newLabel.Location = new Point(currentTrapsX, currentTrapsY);					
+					newLabel.Font = Constants.FORM_FONT;
+					newLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
+					newLabel.AutoSize = true;
+					_oTrapLabels.Add(newLabel);
+					Controls.Add(newLabel);
+                }
 			}
 			else
 			{
 				Controls.Remove(_trapsLabel);
-				Controls.Remove(_oTrapsLabel);
-				Controls.Remove(_uTrapsLabel);
-				Controls.Remove(_mTrapsLabel);
+				//Controls.Remove(_oTrapsLabel);
+				//Controls.Remove(_uTrapsLabel);
+				//Controls.Remove(_mTrapsLabel);
 			}
 		}
 
@@ -499,23 +528,23 @@ namespace FESight
 
 		// Called on ROM start or restart
 		public override void Restart()
-		{			
+		{
+			//FESight.InitBeforeAnyFrame();
 			Metadata metadata = FESight.GetMetadata(APIs);
 
 			FESight.CurrentRomHash = metadata.binary_flags + metadata.seed;
 
 			if(FESight.CurrentRomHash == metadata.binary_flags + metadata.seed)
             {
-				InitializeOnRestartNewROM(metadata);
-            }			
+				InitializeOnRestartNewROM();
+            }
 			
-			InitializeOnRestart(metadata);
+			InitializeOnRestart();
 		}
 
-        private void InitializeOnRestart(Metadata metadata)
+        private void InitializeOnRestart()
         {
-			FESight.InitBeforeAnyFrame(APIs);
-			KeyItems.InitializeKeyItems();
+			
 
 			_trapsLabel.Text = String.Empty;
 			_trapsLabel.Location = new Point();
@@ -529,10 +558,10 @@ namespace FESight
 			_hookCleared = false;
 		}
 
-		private void InitializeOnRestartNewROM(Metadata metadata)
+		private void InitializeOnRestartNewROM()
         {
-			FESight.InitOnRestartNewRom(metadata);
-			SetObjectives(metadata);
+			FESight.InitOnRestartNewRom(APIs);
+			SetObjectives(FESight.CurrentMetaData);
 		}
 
 		// Called after every frame
@@ -540,7 +569,7 @@ namespace FESight
 		{
 			if (APIs.Emulation.FrameCount() % 60 == 0)
             {
-				FESight.InitBeforeAnyFrame(APIs);
+				FESight.InitBeforeAnyFrame();
 				UpdateDisplay();
 			}	
 		}
@@ -552,8 +581,8 @@ namespace FESight
 			UpdateKeyItems();
 			UpdateLocations();
 
-			if(Flags.Ktrap)
-				UpdateTraps();
+			//if(Flags.Ktrap)
+			//	UpdateTraps();
 		}
 
 		private string Debug()
