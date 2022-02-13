@@ -235,7 +235,7 @@ namespace FESight
 			{
 				Controls.Remove(_dMistPictureBox);
 				_dMistPictureBox = new PictureBox();
-				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Gray.png";
+				_dMistPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Bosses-1MistD-Gray.png";
 				_dMistPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
 				_dMistPictureBox.Location = new Point(Constants.DMIST_LABEL_X, Constants.DMIST_LABEL_Y);
 				_dMistPictureBox.Click += ClickDMist;
@@ -499,14 +499,7 @@ namespace FESight
 			UpdateStopWatch();
 			UpdateKeyItems();
 			UpdateLocations();
-			if (Flags.Ktrap)
-				UpdateTrapLabels();
 		}
-
-        private void UpdateTrapLabels()
-        {
-            
-        }
 
         private string Debug()
         {
@@ -546,13 +539,13 @@ namespace FESight
         {
 			if(KILocations.DMistChecked)
             {
-				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Gray.png";
+				_dMistPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Bosses-1MistD-Gray.png";
 				KILocations.DMistChecked = false;
 
 			}
 			else
             {
-				_dMistPictureBox.ImageLocation = "../src/Icons/FFIVFE-Bosses-1MistD-Color.png";
+				_dMistPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Bosses-1MistD-Color.png";
 				KILocations.DMistChecked = true;
 			}
 		}

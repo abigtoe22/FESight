@@ -54,6 +54,12 @@ namespace FESight
         public static Font FORM_FONT = new Font(new FontFamily("Helvetica"), 10f);
         public static Color FORM_FONT_COLOR = Color.White;
 
+#if DEBUG
+
+        public static string ICON_LOCATION = "../src/Icons/";
+#else
+        public static string ICON_LOCATION = "ExternalTools/Icons/";
+#endif
         public const string CARTROM_STRING = "CARTROM";
         public const string WRAM_STRING = "WRAM";
     }

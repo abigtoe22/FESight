@@ -19,7 +19,7 @@ namespace FESight
         {
             get
             {
-                string result = "../src/Icons/FFIVFE-Icons-";
+                string result = Constants.ICON_LOCATION + "FFIVFE-Icons-";
                 result += IconPrefix;
 
                 if(Obtained && Used)
