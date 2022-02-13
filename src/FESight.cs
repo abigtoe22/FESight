@@ -27,6 +27,7 @@ namespace FESight
                 return;
 
             KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);
+            TrapChestAreas.InitializeTrapChestAreas();
         }
 
         internal static void InitOnRestartNewRom(ApiContainer api)

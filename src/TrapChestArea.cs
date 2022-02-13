@@ -35,6 +35,17 @@ namespace FESight
 
     public static class TrapChestAreas
     {
+        public static bool TrapChestAreasInitialized { get; set; }
+        public static TrapChestArea TowerOfZot { get; set; }
         public static List<TrapChestArea> ListOfAreas { get; set; }
+
+        public static void InitializeTrapChestAreas()
+        {
+            TowerOfZot = new TrapChestArea("Tower of Zot", KILocationArea.Overworld);
+            TowerOfZot.Total = 3;
+            TowerOfZot.Current = 3;
+
+            TrapChestAreasInitialized = true;
+        }
     }
 }

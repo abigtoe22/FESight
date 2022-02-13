@@ -27,12 +27,6 @@ namespace FESight
 		private readonly Label _uLocationsLabelChecked;
 		private readonly Label _mLocationsLabelChecked;
 		private readonly Label _trapsLabel;
-		private readonly Label _oTrapsLabel;
-		private readonly Label _uTrapsLabel;
-		private readonly Label _mTrapsLabel;
-		private readonly Label _oTrapsLabelChecked;
-		private readonly Label _uTrapsLabelChecked;
-		private readonly Label _mTrapsLabelChecked;
 		private readonly Label _hookClearedLabel;
 
 		private readonly Stopwatch _stopWatch;
@@ -113,38 +107,11 @@ namespace FESight
 			_trapsLabel.ForeColor = Constants.FORM_FONT_COLOR;
 			_trapsLabel.Font = Constants.FORM_FONT;
 
-			Controls.Add(_oTrapsLabel = new Label());
-			_oTrapsLabel.AutoSize = true;
-			_oTrapsLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
-			_oTrapsLabel.Font = Constants.FORM_FONT;
-
-			Controls.Add(_uTrapsLabel = new Label());
-			_uTrapsLabel.AutoSize = true;
-			_uTrapsLabel.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
-			_uTrapsLabel.Font = Constants.FORM_FONT;
-
-			Controls.Add(_mTrapsLabel = new Label());
-			_mTrapsLabel.AutoSize = true;
-			_mTrapsLabel.ForeColor = Constants.MOON_LOCATIONS_COLOR;
-			_mTrapsLabel.Font = Constants.FORM_FONT;
-
-			Controls.Add(_oTrapsLabelChecked = new Label());
-			_oTrapsLabelChecked.AutoSize = true;
-			_oTrapsLabelChecked.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
-
-			Controls.Add(_uTrapsLabelChecked = new Label());
-			_uTrapsLabelChecked.AutoSize = true;
-			_uTrapsLabelChecked.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
-
-			Controls.Add(_mTrapsLabelChecked = new Label());
-			_mTrapsLabelChecked.AutoSize = true;
-			_mTrapsLabelChecked.ForeColor = Constants.MOON_LOCATIONS_COLOR;
-
 			Controls.Add(_hookClearedLabel = new Label());
 			_hookClearedLabel.AutoSize = true;
 			_hookClearedLabel.ForeColor = Constants.HOOK_CLEAR_LABEL_COLOR;
 			_hookClearedLabel.Font = Constants.FORM_FONT;
-			_hookClearedLabel.Click += hookButtonClick;
+			_hookClearedLabel.Click += hookLabelClick;
 			_hookClearedLabel.Visible = false;
 
 			_stopWatch = new Stopwatch();
@@ -227,7 +194,7 @@ namespace FESight
 
 		}
 
-		private void hookButtonClick(object sender, EventArgs e)
+		private void hookLabelClick(object sender, EventArgs e)
         {
 			if (_hookClearedLabel != null)
             {
@@ -277,35 +244,26 @@ namespace FESight
             }
 
 			if (Flags.Ktrap)
-            {				
-				
+            {								
 				Controls.Add(_trapsLabel);
-				//Controls.Add(_oTrapsLabel);
-				//Controls.Add(_uTrapsLabel);
-				//Controls.Add(_mTrapsLabel);
 				_oTrapLabels = new List<Label>();
-				List<TrapChestArea> oAreas = TrapChestAreas.ListOfAreas.Where(p => p.AreaMap == KILocationArea.Overworld).ToList();
+
+				List<TrapChestArea> oAreas = new List<TrapChestArea>();
+				
+				oAreas.Add(TrapChestAreas.TowerOfZot);
+
 				int currentTrapsX = Constants.TRAPS_START_COORD_X;
 				int currentTrapsY = Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING;
 
-				Label myLabel = new Label();
-				myLabel.Text = "Test Overworld Trap";
-				myLabel.Location = new Point(currentTrapsX, currentTrapsY);
-				myLabel.Font = Constants.FORM_FONT;
-				myLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
-				myLabel.AutoSize = true;
-				_oTrapLabels.Add(myLabel);
-				Controls.Add(myLabel);
-
-
 				foreach (var area in oAreas)
-                {
+				{
 					Label newLabel = new Label();
-					newLabel.Text = area.Name;
+					newLabel.Text = area.Name + String.Format(" [{0}/{1}]", area.Current, area.Total);
 					newLabel.Location = new Point(currentTrapsX, currentTrapsY);					
 					newLabel.Font = Constants.FORM_FONT;
 					newLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
 					newLabel.AutoSize = true;
+					newLabel.Click += (sender, e) => ClickTrapsLabel(area, sender, e);
 					_oTrapLabels.Add(newLabel);
 					Controls.Add(newLabel);
                 }
@@ -313,13 +271,20 @@ namespace FESight
 			else
 			{
 				Controls.Remove(_trapsLabel);
-				//Controls.Remove(_oTrapsLabel);
-				//Controls.Remove(_uTrapsLabel);
-				//Controls.Remove(_mTrapsLabel);
 			}
 		}
 
-		private void UpdateKeyItems()
+        private void ClickTrapsLabel(TrapChestArea area, object sender, EventArgs e)
+        {
+			Label label = (Label)sender;
+			area.Current--;
+			if (area.Current <= 0)
+				Controls.Remove(label);
+			else
+				label.Text = area.Name + String.Format(" [{0}/{1}]", area.Current, area.Total);
+		}
+
+        private void UpdateKeyItems()
 		{
 			APIs.Memory.UseMemoryDomain(Constants.WRAM_STRING);
 
@@ -428,104 +393,6 @@ namespace FESight
 			// TODO: Checked Locations
 		}
 
-		private void UpdateTraps()
-        {
-			int currentX = Constants.TRAPS_START_COORD_X;
-			int currentY = Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING;
-
-			bool showOverworldTraps = false;
-			bool showUnderworldTraps = false;
-			bool showMoonTraps = false;
-
-			List<TrapChestArea> overworldTrapChestAreas = TrapChestAreas.ListOfAreas.Where
-				(
-					p => p.AreaMap == KILocationArea.Overworld &&
-					p.IsAvailable(_hookCleared) &&
-					p.TrapChests.Any(p => p.Checked == false)
-				)
-				.ToList();
-			if (overworldTrapChestAreas.Count > 0)
-				showOverworldTraps = true;
-
-			List<TrapChestArea> underworldTrapChestAreas = TrapChestAreas.ListOfAreas.Where
-				(
-					p => p.AreaMap == KILocationArea.Underground &&
-					p.IsAvailable(_hookCleared) &&
-					p.TrapChests.Any(p => p.Checked == false)
-				)
-				.ToList();
-			if (underworldTrapChestAreas.Count > 0)
-				showUnderworldTraps = true;
-
-			List<TrapChestArea> moonTrapChestAreas = TrapChestAreas.ListOfAreas.Where
-				(
-					p => p.AreaMap == KILocationArea.Moon &&
-					p.IsAvailable(_hookCleared) &&
-					p.TrapChests.Any(p => p.Checked == false)
-				)
-				.ToList();
-			if(moonTrapChestAreas.Count > 0)
-				showMoonTraps = true;
-
-
-			_oTrapsLabel.Location = new Point(currentX, currentY);
-			string tempTrapText = "";
-
-			if(showOverworldTraps)
-            {
-				_oTrapsLabel.Visible = true;
-				foreach (var area in overworldTrapChestAreas)
-				{
-					tempTrapText += "\n" + area.Name + " [" + area.TrapChests.Where(p => p.Checked == false).Count() + "]";
-				}
-			}
-			else
-            {
-				_oTrapsLabel.Visible = false;
-            }
-
-			_oTrapsLabel.Text = tempTrapText;
-
-			_uTrapsLabel.Location = new Point(currentX, currentY + _oTrapsLabel.Size.Height);
-			tempTrapText = "";
-
-			if (showUnderworldTraps)
-			{
-				_uTrapsLabel.Visible = true;
-				foreach (var area in underworldTrapChestAreas)
-				{
-					tempTrapText += "\n" + area.Name + " [" + area.TrapChests.Where(p => p.Checked == false).Count() + "]";
-				}
-
-			}
-			else
-			{
-				_uTrapsLabel.Visible = false;
-			}
-
-			_uTrapsLabel.Text = tempTrapText;
-
-			_mTrapsLabel.Location = new Point(currentX, currentY + _oTrapsLabel.Size.Height + _uTrapsLabel.Size.Height);
-			tempTrapText = "";
-
-			if (showMoonTraps)
-			{
-				_mTrapsLabel.Visible = true;
-				foreach (var area in moonTrapChestAreas)
-				{
-					tempTrapText += "\n" + area.Name + " [" + area.TrapChests.Where(p => p.Checked == false).Count() + "]";
-				}
-
-			}
-			else
-			{
-				_mTrapsLabel.Visible = false;
-			}
-
-			_mTrapsLabel.Text = tempTrapText;
-
-		}
-
 		// Called on ROM start or restart
 		public override void Restart()
 		{
@@ -580,9 +447,6 @@ namespace FESight
 			UpdateStopWatch();
 			UpdateKeyItems();
 			UpdateLocations();
-
-			//if(Flags.Ktrap)
-			//	UpdateTraps();
 		}
 
 		private string Debug()
