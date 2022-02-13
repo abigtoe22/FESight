@@ -43,8 +43,8 @@ namespace FESight
 
         public const int TRAPS_START_COORD_X = 650;
         public const int TRAPS_START_COORD_Y = 0;
-        public const int TRAPS_HEIGHT = 12;
-        public const int TRAPS_LABEL_HEADING_PADDING = 25;
+        public const int TRAPS_HEIGHT = 16;
+        public const int TRAPS_LABEL_HEADING_PADDING = 10;
 
         public static Color OVERWORLD_LOCATIONS_COLOR = Color.FromArgb(0, 255, 153);
         public static Color UNDERGROUND_LOCATIONS_COLOR = Color.FromArgb(255, 0, 153);

@@ -18,7 +18,7 @@ namespace FESight
         internal static void InitBeforeRomLoad()
         {
             KeyItems.InitializeKeyItems();
-            TrapChestAreas.ListOfAreas = new List<TrapChestArea>();
+            TrapChestAreas.InitializeTrapChestAreas();
         }
 
         internal static void InitBeforeAnyFrame()
@@ -26,8 +26,7 @@ namespace FESight
             if (InitializedBeforeFrames)
                 return;
 
-            KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);
-            TrapChestAreas.InitializeTrapChestAreas();
+            KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);            
         }
 
         internal static void InitOnRestartNewRom(ApiContainer api)
