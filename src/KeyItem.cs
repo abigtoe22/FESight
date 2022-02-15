@@ -78,7 +78,6 @@ namespace FESight
                 return;
 
             Crystal = new KeyItem("Crystal", "1THECrystal", 16);
-            Pass = new KeyItem("Pass", "2Pass", 17);
             Hook = new KeyItem("Hook", "3Hook", 8);
             DarknessCrystal = new KeyItem("Darkness Crystal", "4DarkCrystal", 10);
             EarthCrystal = new KeyItem("Earth Crystal", "5EarthCrystal", 5);
@@ -98,7 +97,6 @@ namespace FESight
 
             KeyItemList = new List<KeyItem>();
             KeyItemList.Add(Crystal);
-            KeyItemList.Add(Pass);
             KeyItemList.Add(Hook);
             KeyItemList.Add(DarknessCrystal);
             KeyItemList.Add(EarthCrystal);

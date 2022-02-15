@@ -35,6 +35,8 @@ namespace FESight
 		{
 			if (memoryArray[Index])
 				Checked = true;
+			else
+				Checked = false;
 
 			return Checked;
 		}
@@ -94,7 +96,6 @@ namespace FESight
 						}
 					}
 				}
-
 
 				return kIsRequiredObtained;
 
@@ -204,11 +205,23 @@ namespace FESight
 		//LolBez
 		public static KILocation Golbez { get; set; }
 
+#if DEBUG
+		public static string debugString { get; set; }
+#endif
 
-		public static void InitializeKILocations(bool objectiveFlag, bool mainFlag, bool summonFlag, bool moonFlag, bool trapFlag, bool unSafeFlag, bool noFreeFlag)
+
+
+		public static void InitializeKILocations(bool force)
         {
-			if (KILocationsInitialized)
+			if (KILocations.KILocationsInitialized && !force)
 				return;
+
+#if DEBUG
+			KILocations.debugString += "Initialized";
+#endif
+
+			DMistChecked = false;
+			KILocationsInitialized = true;
 
 			ListOfKILocations = new List<KILocation>();
 			
@@ -290,7 +303,7 @@ namespace FESight
 			// Technically a location but we're not going to display it
 			ObjectiveCompletion = new KILocation("Objective Completion", "0x005D", KILocationFlagType.Objective, new List<KeyItem>(), true, KILocationArea.Overworld);
 
-			if (mainFlag)
+			if (Flags.Kmain)
             {
 				ListOfKILocations.Add(StartingItem);
 				ListOfKILocations.Add(AntlionNest);
@@ -309,7 +322,7 @@ namespace FESight
 				ListOfKILocations.Add(Sheila1);
 				ListOfKILocations.Add(Sheila2);
 
-				if (noFreeFlag)
+				if (Flags.Knofree)
 				{
 					ListOfKILocations.Add(DMist);
 				}
@@ -319,7 +332,7 @@ namespace FESight
 				}
 			}
 
-			if(summonFlag)
+			if(Flags.Ksummon)
             {
 				ListOfKILocations.Add(FeymarchQueen);
 				ListOfKILocations.Add(FeymarchKing);
@@ -328,7 +341,7 @@ namespace FESight
 				ListOfKILocations.Add(CaveBahamut);
 			}
 
-			if(moonFlag)
+			if(Flags.Kmoon)
             {
 				ListOfKILocations.Add(MurasameAltar);
 				ListOfKILocations.Add(CrystalSwordAltar);
@@ -337,13 +350,6 @@ namespace FESight
 				ListOfKILocations.Add(RibbonChest2);
 				ListOfKILocations.Add(MasamuneAltar);
 			}
-
-			if(objectiveFlag)
-            {
-				ListOfKILocations.Add(ObjectiveCompletion);
-            }
-
-			KILocationsInitialized = true;
         }
 	}
 }

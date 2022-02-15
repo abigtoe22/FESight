@@ -41,8 +41,10 @@ namespace FESight
 
 		private Label _kiTotalLabel;
 		private PictureBox _dMistPictureBox;
+		private PictureBox _passPictureBox;
 
 		private bool _hookCleared;
+		private bool _passObtained;
 
 		private readonly Label _debug;
 
@@ -148,19 +150,21 @@ namespace FESight
 			_stopWatchRestartButton.Click += RestartStopWatch;
 
 			Controls.Add(_dMistPictureBox = new PictureBox());
+			Controls.Add(_passPictureBox = new PictureBox());
 			Controls.Add(_kiTotalLabel = new Label());
 			_kiTotalLabel.Location = new Point(Constants.KI_TOTAL_LABEL_X, Constants.KI_TOTAL_LABEL_Y);
 			_kiTotalLabel.Font = Constants.FORM_FONT;
 			_kiTotalLabel.ForeColor = Constants.FORM_FONT_COLOR;
 
-			// TODO: Proper DEBUG compiler stuff
+#if DEBUG
 			Controls.Add(_debug = new Label());
             _debug.Location = new Point(400, 400);
             _debug.AutoSize = true;
             _debug.ForeColor = Constants.FORM_FONT_COLOR;
+#endif
 
 
-            ResumeLayout();
+			ResumeLayout();
 		}
 
         private void InitKeyItemIcons()
@@ -173,17 +177,16 @@ namespace FESight
 
 			foreach (var keyItem in KeyItems.KeyItemList)
 			{
-				if (count % 4 == 0 && count != 0)
+				if (x == Constants.MAX_ICON_X && count != 0)
 				{
 					y = y + ICON_SPACE;
 					x = 0;
 				}
 
-				if (keyItem.Name == "Rat Tail")
+				if (keyItem.Name == "Rat Tail" || keyItem.Name == "Hook")
 				{
 					x = x + ICON_SPACE;
 				}
-
 
 				keyItem.PictureBox = new PictureBox();
 				keyItem.PictureBox.ImageLocation = keyItem.IconLocation;
@@ -217,19 +220,36 @@ namespace FESight
 
 			int currentY = Constants.OBJECTIVES_START_COORDS_Y;
 
-			foreach (var objective in metadata.objectives)
+			if(metadata.objectives != null)
             {
-				currentY += 20;
-				CheckBox objectiveCheckbox = new CheckBox();
-				objectiveCheckbox.Location = new Point(Constants.OBJECTIVES_START_COORDS_X, currentY);
-				objectiveCheckbox.ForeColor = Constants.FORM_FONT_COLOR;
-				objectiveCheckbox.Font = Constants.FORM_FONT;
-				objectiveCheckbox.AutoSize = true;
-				objectiveCheckbox.Text = objective;
+                _objectivesLabel.Text = "Objectives:";
+				foreach (var objective in metadata.objectives)
+				{
+					currentY += 20;
+					CheckBox objectiveCheckbox = new CheckBox();
+					objectiveCheckbox.Location = new Point(Constants.OBJECTIVES_START_COORDS_X, currentY);
+					objectiveCheckbox.ForeColor = Constants.FORM_FONT_COLOR;
+					objectiveCheckbox.Font = Constants.FORM_FONT;
+					objectiveCheckbox.AutoSize = true;
+					objectiveCheckbox.Text = objective;
 
-				_objectivesCheckboxes.Add(objectiveCheckbox);
-				Controls.Add(objectiveCheckbox);
+					_objectivesCheckboxes.Add(objectiveCheckbox);
+					Controls.Add(objectiveCheckbox);
+				}
+			}
+			else
+            {
+				_objectivesLabel.Text = "No Specific Objectives";
             }
+
+			Controls.Remove(_passPictureBox);
+			_passPictureBox = new PictureBox();
+			_passPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Icons-2Pass-Gray.png";
+			_passPictureBox.SizeMode = PictureBoxSizeMode.AutoSize;
+			_passPictureBox.Location = new Point(Constants.PASS_LABEL_X, Constants.PASS_LABEL_Y);
+			_passPictureBox.Click += ClickPass;
+			Controls.Add(_passPictureBox);
+
 
 			if (Flags.Knofree)
 			{
@@ -412,7 +432,7 @@ namespace FESight
             }
 			_oLocationsLabel.Text = tempLocationsText;
 
-			bool displayHookLabel = _hookCleared == false && (KeyItems.Hook.Obtained || Flags.OtherPushBToJump);
+			bool displayHookLabel = _hookCleared == false && KeyItems.MagmaKey.Obtained == false && (KeyItems.Hook.Obtained || Flags.OtherPushBToJump);
 
 			if (displayHookLabel)
 			{
@@ -488,20 +508,23 @@ namespace FESight
 		{
 			if (APIs.Emulation.FrameCount() % 60 == 0)
             {
-				FESight.InitBeforeAnyFrame();
+				FESight.InitBeforeAnyFrame(false);
 				UpdateDisplay();
 			}	
 		}
 
 		private void UpdateDisplay()
         {
-			//_debug.Text = Debug();
+#if DEBUG
+			_debug.Text = Debug();
+#endif
 			UpdateStopWatch();
 			UpdateKeyItems();
 			UpdateLocations();
 		}
 
-        private string Debug()
+#if DEBUG
+		private string Debug()
         {
 			string output = "Debug: \n";
 
@@ -511,6 +534,7 @@ namespace FESight
 
 			return output;
 		}
+#endif
 
 		private void StartStopWatch(object sender, EventArgs e)
         {
@@ -536,22 +560,36 @@ namespace FESight
 		}
 
 		private void ClickDMist(object sender, EventArgs e)
-        {
-			if(KILocations.DMistChecked)
-            {
+		{
+			if (KILocations.DMistChecked)
+			{
 				_dMistPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Bosses-1MistD-Gray.png";
 				KILocations.DMistChecked = false;
 
 			}
 			else
-            {
+			{
 				_dMistPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Bosses-1MistD-Color.png";
 				KILocations.DMistChecked = true;
 			}
 		}
 
+		private void ClickPass(object sender, EventArgs e)
+		{
+			if (_passObtained == false)
+            {
+				_passPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Icons-2Pass-Color.png";
+				_passObtained = true;
+            }
+			else
+            {
+				_passPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Icons-2Pass-Gray.png";
+				_passObtained = false;
+			}
+		}
+
 		// Not used unless I decide to use the forms designer
-        private void InitializeComponent()
+		private void InitializeComponent()
         {
             this.SuspendLayout();
             // 

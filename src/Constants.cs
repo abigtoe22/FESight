@@ -40,6 +40,8 @@ namespace FESight
 
         public const int DMIST_LABEL_X = 0;
         public const int DMIST_LABEL_Y = 160;
+        public const int PASS_LABEL_X = 40;
+        public const int PASS_LABEL_Y = 0;
 
         public const int TRAPS_START_COORD_X = 650;
         public const int TRAPS_START_COORD_Y = 0;
@@ -54,8 +56,8 @@ namespace FESight
         public static Font FORM_FONT = new Font(new FontFamily("Helvetica"), 10f);
         public static Color FORM_FONT_COLOR = Color.White;
 
+        public static int MAX_ICON_X = 160;
 #if DEBUG
-
         public static string ICON_LOCATION = "../src/Icons/";
 #else
         public static string ICON_LOCATION = "ExternalTools/Icons/";

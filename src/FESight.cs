@@ -21,12 +21,13 @@ namespace FESight
             TrapChestAreas.InitializeTrapChestAreas();
         }
 
-        internal static void InitBeforeAnyFrame()
+        internal static void InitBeforeAnyFrame(bool force)
         {
-            if (InitializedBeforeFrames)
+            if (InitializedBeforeFrames && !force)
                 return;
 
-            KILocations.InitializeKILocations(false, Flags.Kmain, Flags.Ksummon, Flags.Kmoon, Flags.Ktrap, Flags.Kunsafe || Flags.Kunsafer, Flags.Knofree);            
+            InitializedBeforeFrames = true;
+            KILocations.InitializeKILocations(true);            
         }
 
         internal static void InitOnRestartNewRom(ApiContainer api)
@@ -36,6 +37,7 @@ namespace FESight
             CurrentRomHash = metadata.binary_flags + metadata.seed;
 
             Flags.SetFlags(metadata);
+            InitBeforeAnyFrame(true);
         }
 
         internal static Metadata GetMetadata(ApiContainer api)
@@ -99,7 +101,5 @@ namespace FESight
             int result = BitConverter.ToInt32(data, 0);
             return result;
         }
-
-
     }
 }
