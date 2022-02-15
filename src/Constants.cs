@@ -55,6 +55,7 @@ namespace FESight
 
         public static Font FORM_FONT = new Font(new FontFamily("Helvetica"), 10f);
         public static Color FORM_FONT_COLOR = Color.White;
+        public static Color FORM_FONT_COLOR_CHECKED_OBJECTIVES = Color.Gray;
 
         public static int MAX_ICON_X = 160;
 #if DEBUG

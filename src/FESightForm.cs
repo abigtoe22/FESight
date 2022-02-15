@@ -223,6 +223,11 @@ namespace FESight
 			if(metadata.objectives != null)
             {
                 _objectivesLabel.Text = "Objectives:";
+				if(String.IsNullOrWhiteSpace(Flags.ORequiredNumber) == false)
+                {
+					_objectivesLabel.Text += " (Require " + Flags.ORequiredNumber + ")";
+                }
+
 				foreach (var objective in metadata.objectives)
 				{
 					currentY += 20;
@@ -232,6 +237,7 @@ namespace FESight
 					objectiveCheckbox.Font = Constants.FORM_FONT;
 					objectiveCheckbox.AutoSize = true;
 					objectiveCheckbox.Text = objective;
+					objectiveCheckbox.CheckedChanged += CheckObjectiveBox;
 
 					_objectivesCheckboxes.Add(objectiveCheckbox);
 					Controls.Add(objectiveCheckbox);
@@ -326,7 +332,23 @@ namespace FESight
 			}
 		}
 
-		private void RemoveTrapLabels()
+        private void CheckObjectiveBox(object sender, EventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+			if (checkBox != null)
+            {
+				if(checkBox.Checked)
+                {
+					checkBox.ForeColor = Constants.FORM_FONT_COLOR_CHECKED_OBJECTIVES;
+                }
+				else
+                {
+					checkBox.ForeColor = Constants.FORM_FONT_COLOR;
+				}
+            }
+        }
+
+        private void RemoveTrapLabels()
         {
 			Controls.Remove(_trapsLabel);
 
@@ -529,7 +551,7 @@ namespace FESight
 			string output = "Debug: \n";
 
 			// Debug stuff!
-
+			output += Flags.ORequiredNumber;
 			// End debug stuff.
 
 			return output;

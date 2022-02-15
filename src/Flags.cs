@@ -10,6 +10,7 @@ namespace FESight
     {
         //Objective flags
         public static bool OwinCyrstal { get; set; }
+        public static string ORequiredNumber { get; set; }
 
         //Key Item flags
         public static bool Kmain { get; set; }
@@ -165,6 +166,18 @@ namespace FESight
 
                     if(objectiveFlags.Contains("win:crystal"))
                         OwinCyrstal = true;
+
+                    List<string> objectiveSections = section.ToLower().Split(new string[] { "req:"}, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                    if(string.IsNullOrWhiteSpace(objectiveSections[1]) == false)
+                    {
+                        List<string> reqSections = objectiveSections[1].Split('/').ToList();
+
+                        if(reqSections.Any() == true)
+                            ORequiredNumber = reqSections[0];
+                    }
+
+
                 }
 
                 if(section.ToLower().StartsWith("k"))
