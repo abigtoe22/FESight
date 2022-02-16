@@ -169,15 +169,13 @@ namespace FESight
 
                     List<string> objectiveSections = section.ToLower().Split(new string[] { "req:"}, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                    if(string.IsNullOrWhiteSpace(objectiveSections[1]) == false)
+                    if(objectiveSections.Count > 1 && string.IsNullOrWhiteSpace(objectiveSections[1]) == false)
                     {
                         List<string> reqSections = objectiveSections[1].Split('/').ToList();
 
                         if(reqSections.Any() == true)
                             ORequiredNumber = reqSections[0];
                     }
-
-
                 }
 
                 if(section.ToLower().StartsWith("k"))
