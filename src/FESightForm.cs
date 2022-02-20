@@ -38,6 +38,10 @@ namespace FESight
 		private List<Label> _oTrapLabels;
 		private List<Label> _uTrapLabels;
 		private List<Label> _mTrapLabels;
+		private List<TrapChestAreaLabel> _trapChestAreaLabels;
+		private int _oTrapChestHeight;
+		private int _uTrapChestHeight;
+		private int _mTrapChestHeight;
 
 		private Label _kiTotalLabel;
 		private PictureBox _dMistPictureBox;
@@ -278,6 +282,7 @@ namespace FESight
 			if (Flags.Ktrap)
             {
 				TrapChestAreas.ResetChestTotals();
+				_trapChestAreaLabels = new List<TrapChestAreaLabel>();
 				Controls.Add(_trapsLabel);
 
 				int currentTrapsX = Constants.TRAPS_START_COORD_X;
@@ -287,14 +292,16 @@ namespace FESight
 				{
 					currentTrapsY += Constants.TRAPS_HEIGHT;
 					Label newLabel = new Label();
-					newLabel.Text = area.Name + String.Format(" [{0}/{1}]", area.Current, area.Total);
+					TrapChestAreaLabel areaLabel = new TrapChestAreaLabel(area, newLabel);
+					_trapChestAreaLabels.Add(new TrapChestAreaLabel(area, newLabel));
+					_oTrapLabels.Add(newLabel);
+
+					areaLabel.UpdateLabelText();
 					newLabel.Location = new Point(currentTrapsX, currentTrapsY);
 					newLabel.Font = Constants.FORM_FONT;
 					newLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
 					newLabel.AutoSize = true;
-					newLabel.Click += (sender, e) => ClickTrapsLabel(area, sender, e);
-					_oTrapLabels.Add(newLabel);
-					Controls.Add(newLabel);
+					newLabel.Click += (sender, e) => ClickTrapsLabel(areaLabel, sender, e);
 				}
 
 				currentTrapsY += Constants.TRAPS_LABEL_HEADING_PADDING;
@@ -303,14 +310,16 @@ namespace FESight
                 {
 					currentTrapsY += Constants.TRAPS_HEIGHT;
 					Label newLabel = new Label();
-                    newLabel.Text = area.Name + String.Format(" [{0}/{1}]", area.Current, area.Total);
-                    newLabel.Location = new Point(currentTrapsX, currentTrapsY);
+					TrapChestAreaLabel areaLabel = new TrapChestAreaLabel(area, newLabel);
+					_trapChestAreaLabels.Add(new TrapChestAreaLabel(area, newLabel));
+					_uTrapLabels.Add(newLabel);
+
+					areaLabel.UpdateLabelText();
+					newLabel.Location = new Point(currentTrapsX, currentTrapsY);
                     newLabel.Font = Constants.FORM_FONT;
                     newLabel.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
                     newLabel.AutoSize = true;
-                    newLabel.Click += (sender, e) => ClickTrapsLabel(area, sender, e);
-                    _uTrapLabels.Add(newLabel);
-                    Controls.Add(newLabel);
+                    newLabel.Click += (sender, e) => ClickTrapsLabel(areaLabel, sender, e);
                 }
 
 				currentTrapsY += Constants.TRAPS_LABEL_HEADING_PADDING;
@@ -319,19 +328,17 @@ namespace FESight
                 {
 					currentTrapsY += Constants.TRAPS_HEIGHT;
 					Label newLabel = new Label();
-                    newLabel.Text = area.Name + String.Format(" [{0}/{1}]", area.Current, area.Total);
-                    newLabel.Location = new Point(currentTrapsX, currentTrapsY);
-                    newLabel.Font = Constants.FORM_FONT;
-                    newLabel.ForeColor = Constants.MOON_LOCATIONS_COLOR;
-                    newLabel.AutoSize = true;
-                    newLabel.Click += (sender, e) => ClickTrapsLabel(area, sender, e);
-                    _mTrapLabels.Add(newLabel);
-                    Controls.Add(newLabel);
-                }
-            }
-			else
-			{
-				RemoveTrapLabels();
+					TrapChestAreaLabel areaLabel = new TrapChestAreaLabel(area, newLabel);
+					_trapChestAreaLabels.Add(new TrapChestAreaLabel(area, newLabel));
+					_mTrapLabels.Add(newLabel);
+
+					areaLabel.UpdateLabelText();
+					newLabel.Location = new Point(currentTrapsX, currentTrapsY);
+					newLabel.Font = Constants.FORM_FONT;
+					newLabel.ForeColor = Constants.MOON_LOCATIONS_COLOR;
+					newLabel.AutoSize = true;
+					newLabel.Click += (sender, e) => ClickTrapsLabel(areaLabel, sender, e);
+				}
 			}
 		}
 
@@ -351,26 +358,6 @@ namespace FESight
             }
         }
 
-        private void RemoveTrapLabels()
-        {
-			Controls.Remove(_trapsLabel);
-
-			foreach (var trap in _oTrapLabels)
-			{
-				Controls.Remove(trap);
-			}
-
-			foreach (var trap in _uTrapLabels)
-			{
-				Controls.Remove(trap);
-			}
-
-			foreach (var trap in _mTrapLabels)
-			{
-				Controls.Remove(trap);
-			}
-		}
-
 		private void checkBox_Paint(object sender, PaintEventArgs e)
 		{
 			base.OnPaint(e);
@@ -389,14 +376,14 @@ namespace FESight
 			}
 		}
 
-		private void ClickTrapsLabel(TrapChestArea area, object sender, EventArgs e)
+		private void ClickTrapsLabel(TrapChestAreaLabel areaLabel, object sender, EventArgs e)
         {
 			Label label = (Label)sender;
-			area.Current--;
-			if (area.Current < 0)
-				area.Current = area.Total;
+			areaLabel.Area.Current--;
+			if (areaLabel.Area.Current < 0)
+				areaLabel.Area.Current = areaLabel.Area.Total;
 			
-			label.Text = area.Name + String.Format(" [{0}/{1}]", area.Current, area.Total);
+			label.Text = areaLabel.Area.Name + String.Format(" [{0}/{1}]", areaLabel.Area.Current, areaLabel.Area.Total);
 		}
 
         private void UpdateKeyItems()
@@ -526,8 +513,6 @@ namespace FESight
 
         private void InitializeOnRestart()
         {
-			
-
 			_trapsLabel.Text = String.Empty;
 			_trapsLabel.Location = new Point();
 
@@ -565,10 +550,79 @@ namespace FESight
 			UpdateKeyItems();
 			UpdateLocations();
 			UpdateObjectives();
-			
+			if(Flags.Ktrap)
+				UpdateTraps();
 		}
 
-        private void UpdateObjectives()
+        private void UpdateTraps()
+        {
+			int currentX = Constants.TRAPS_START_COORD_X;
+			int currentY = Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING + Constants.TRAPS_HEIGHT;
+
+			List<TrapChestAreaLabel> oAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Overworld).ToList();
+			foreach (var areaLabel in oAreaLabels)
+			{
+				if (areaLabel.Area.IsAvailable(_hookCleared) && !areaLabel.LabelAdded)
+				{
+					Controls.Add(areaLabel.Label);
+					areaLabel.LabelAdded = true;
+					_oTrapChestHeight += Constants.TRAPS_HEIGHT;
+				}
+
+				if(areaLabel.LabelAdded)
+                {
+					areaLabel.Label.Location = new Point(currentX, currentY);
+					currentY += Constants.TRAPS_HEIGHT;
+				}
+			}
+
+			if(oAreaLabels.Where(p => p.LabelAdded).Any())
+            {				
+				currentY = _oTrapChestHeight + Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2;
+			}
+				
+
+			List<TrapChestAreaLabel> uAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Underground).ToList();
+			foreach (var areaLabel in uAreaLabels)
+			{
+				if (areaLabel.Area.IsAvailable(_hookCleared) && !areaLabel.LabelAdded)
+				{
+					Controls.Add(areaLabel.Label);
+					areaLabel.LabelAdded = true;
+					_uTrapChestHeight += Constants.TRAPS_HEIGHT;
+				}
+
+				if (areaLabel.LabelAdded)
+				{
+					areaLabel.Label.Location = new Point(currentX, currentY);
+					currentY += Constants.TRAPS_HEIGHT;					
+				}
+			}
+
+			if (oAreaLabels.Where(p => p.LabelAdded).Any())
+			{
+				currentY = _uTrapChestHeight + _oTrapChestHeight + Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2;
+			}
+
+			List<TrapChestAreaLabel> mAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Moon).ToList();
+			foreach (var areaLabel in mAreaLabels)
+			{
+				if (areaLabel.Area.IsAvailable(_hookCleared) && !areaLabel.LabelAdded)
+				{
+					Controls.Add(areaLabel.Label);
+					areaLabel.LabelAdded = true;
+					_mTrapChestHeight += Constants.TRAPS_HEIGHT;
+				}
+
+				if (areaLabel.LabelAdded)
+				{
+					areaLabel.Label.Location = new Point(currentX, currentY);
+					currentY += Constants.TRAPS_HEIGHT;					
+				}
+			}
+		}
+
+		private void UpdateObjectives()
         {
 			if(FESight.CurrentMetaData.objectives != null && FESight.CurrentMetaData.objectives.Count > 0)
             {
@@ -664,6 +718,25 @@ namespace FESight
             this.ResumeLayout(false);
 
         }
+    }
+
+	public class TrapChestAreaLabel
+    {
+		public TrapChestArea Area { get; set; }
+		public Label Label { get; set; }
+		public bool LabelAdded { get; set; }
+
+		public TrapChestAreaLabel(TrapChestArea area, Label label)
+        {
+			Area = area;
+			Label = label;
+			LabelAdded = false;
+        }
+
+		public void UpdateLabelText()
+        {
+			Label.Text = String.Format(Area.Name + " [{0}/{1}]", Area.Current, Area.Total);
+		}
     }
 
 

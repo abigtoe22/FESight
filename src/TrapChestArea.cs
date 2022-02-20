@@ -106,8 +106,8 @@ namespace FESight
 			LowerBabil = new TrapChestArea("Lower Babil", KILocationArea.Underground, new List<KeyItem> { KeyItems.MagmaKey }, false, 4);
 			SylphCave = new TrapChestArea("Sylph Cave", KILocationArea.Underground, new List<KeyItem> { KeyItems.MagmaKey }, false, 7);
 
-			LunarPath = new TrapChestArea("Lunar Path", KILocationArea.Moon, new List<KeyItem> { }, false, 1);
-			LunarSubterrane = new TrapChestArea("Lunar Subterrane", KILocationArea.Moon, new List<KeyItem> { }, false, 9);
+			LunarPath = new TrapChestArea("Lunar Path", KILocationArea.Moon, new List<KeyItem> { KeyItems.DarknessCrystal }, false, 1);
+			LunarSubterrane = new TrapChestArea("Lunar Subterrane", KILocationArea.Moon, new List<KeyItem> { KeyItems.DarknessCrystal }, false, 9);
 
 
 			ListOfAreas = new List<TrapChestArea>();
