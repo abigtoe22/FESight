@@ -14,6 +14,7 @@ namespace FESight
     {
         public static string CurrentRomHash { get; set; }
         public static Metadata CurrentMetaData { get; set; }
+        public static List<Objective> CurrentObjectiveList { get; set; }
         public static bool InitializedBeforeFrames { get; set; }
         internal static void InitBeforeRomLoad()
         {
@@ -37,6 +38,7 @@ namespace FESight
             CurrentRomHash = metadata.binary_flags + metadata.seed;
 
             Flags.SetFlags(metadata);
+            SetObjectives();
             InitBeforeAnyFrame(true);
         }
 
@@ -79,6 +81,35 @@ namespace FESight
             else
             {
                 throw new Exception("Can't read CARTROM memory domain.");
+            }
+        }
+
+        internal static void SetObjectives()
+        {
+            CurrentObjectiveList = new List<Objective>();
+
+            if(CurrentObjectiveList != null && CurrentMetaData.objectives != null && CurrentMetaData.objectives.Count > 0)
+            {
+                for (int i = 0; i < CurrentMetaData.objectives.Count; i++)
+                {
+                    Objective newObjective = new Objective();
+                    newObjective.Title = CurrentMetaData.objectives[i];
+                    newObjective.ByteIndex = i;
+                    newObjective.Complete = false;
+                    CurrentObjectiveList.Add(newObjective);
+                }
+            }
+        }
+
+        internal static void CheckObjectives(ApiContainer api)
+        {
+            List<byte> bytes = api.Memory.ReadByteRange(Constants.OBJECTIVE_COMPLETION_START_ADDRESS, Constants.OBJECTIVE_COMPLETION_MEMORY_LENGTH, Constants.WRAM_STRING);
+            for (int i = 0; i < CurrentObjectiveList.Count; i++)
+            {
+                if(bytes[i] == 1)
+                    CurrentObjectiveList[i].Complete = true;
+                else
+                    CurrentObjectiveList[i].Complete = false;
             }
         }
 

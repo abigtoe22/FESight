@@ -22,6 +22,9 @@ namespace FESight
         public const int KI_USED_START_ADDRESS = 0x1503;
         public const int KI_USED_BYTES_LENGTH = 3;
 
+        public const int OBJECTIVE_COMPLETION_START_ADDRESS = 0x1520;
+        public const int OBJECTIVE_COMPLETION_MEMORY_LENGTH = 28;
+
         public const int CLIENT_SIZE_X = 800;
         public const int CLIENT_SIZE_Y = 650;
 
@@ -65,5 +68,7 @@ namespace FESight
 #endif
         public const string CARTROM_STRING = "CARTROM";
         public const string WRAM_STRING = "WRAM";
+
+        
     }
 }

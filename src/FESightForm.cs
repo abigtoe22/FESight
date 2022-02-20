@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-
+using System.Windows.Forms.VisualStyles;
 using BizHawk.Client.Common;
 using BizHawk.Client.EmuHawk;
 using Newtonsoft.Json;
@@ -50,7 +50,7 @@ namespace FESight
 
 		internal ApiContainer APIs => _maybeAPIContainer!;
 
-		protected override string WindowTitleStatic => "FE Sight";
+		protected override string WindowTitleStatic => "FESight";
         public override bool BlocksInputWhenFocused { get { return false; } }
 
         public FESightForm()
@@ -209,7 +209,7 @@ namespace FESight
             }
         }
 
-		private void SetObjectives(Metadata metadata)
+		private void SetObjectiveCheckboxes(Metadata metadata)
 		{
 			foreach (var objectiveCheckbox in _objectivesCheckboxes)
             {
@@ -222,21 +222,24 @@ namespace FESight
 
 			if(metadata.objectives != null)
             {
-                _objectivesLabel.Text = "Objectives:";
+                _objectivesLabel.Text = "Objectives";
 				if(String.IsNullOrWhiteSpace(Flags.ORequiredNumber) == false)
                 {
-					_objectivesLabel.Text += " (Require " + Flags.ORequiredNumber + ")";
+					_objectivesLabel.Text += " (0 / " + Flags.ORequiredNumber + " Complete):";
                 }
 
 				foreach (var objective in metadata.objectives)
 				{
 					currentY += 20;
 					CheckBox objectiveCheckbox = new CheckBox();
+
+					objectiveCheckbox.Enabled = false;
 					objectiveCheckbox.Location = new Point(Constants.OBJECTIVES_START_COORDS_X, currentY);
 					objectiveCheckbox.ForeColor = Constants.FORM_FONT_COLOR;
 					objectiveCheckbox.Font = Constants.FORM_FONT;
 					objectiveCheckbox.AutoSize = true;
 					objectiveCheckbox.Text = objective;
+					objectiveCheckbox.Paint += checkBox_Paint;
 					objectiveCheckbox.CheckedChanged += CheckObjectiveBox;
 
 					_objectivesCheckboxes.Add(objectiveCheckbox);
@@ -365,6 +368,24 @@ namespace FESight
 			foreach (var trap in _mTrapLabels)
 			{
 				Controls.Remove(trap);
+			}
+		}
+
+		private void checkBox_Paint(object sender, PaintEventArgs e)
+		{
+			base.OnPaint(e);
+			CheckBox checkBox = sender as CheckBox;
+			if (!checkBox.Enabled)
+			{
+				CheckBox checkbox = sender as CheckBox;
+
+				int x = ClientRectangle.X + CheckBoxRenderer.GetGlyphSize(
+					e.Graphics, CheckBoxState.UncheckedNormal).Width + 1;
+				int y = ClientRectangle.Y + 1;
+
+				TextRenderer.DrawText(e.Graphics, checkbox.Text,
+					checkbox.Font, new Point(x, y), checkbox.ForeColor,
+					TextFormatFlags.LeftAndRightPadding);
 			}
 		}
 
@@ -522,7 +543,7 @@ namespace FESight
 		private void InitializeOnRestartNewROM()
         {
 			FESight.InitOnRestartNewRom(APIs);
-			SetObjectives(FESight.CurrentMetaData);
+			SetObjectiveCheckboxes(FESight.CurrentMetaData);
 		}
 
 		// Called after every frame
@@ -543,6 +564,28 @@ namespace FESight
 			UpdateStopWatch();
 			UpdateKeyItems();
 			UpdateLocations();
+			UpdateObjectives();
+			
+		}
+
+        private void UpdateObjectives()
+        {
+			if(FESight.CurrentMetaData.objectives != null && FESight.CurrentMetaData.objectives.Count > 0)
+            {
+				FESight.CheckObjectives(APIs);
+
+				foreach (var objective in FESight.CurrentObjectiveList.Where(p => p.Complete))
+				{
+					_objectivesCheckboxes.Where(p => p.Text == objective.Title).First().Checked = true;
+				}
+				foreach (var objective in FESight.CurrentObjectiveList.Where(p => p.Complete == false))
+				{
+					_objectivesCheckboxes.Where(p => p.Text == objective.Title).First().Checked = false;
+				}
+
+				int completedCount = FESight.CurrentObjectiveList.Where(p => p.Complete).Count();
+				_objectivesLabel.Text = String.Format("Objectives ({0} / {1} Complete):", completedCount, Flags.ORequiredNumber);
+			}
 		}
 
 #if DEBUG
@@ -551,7 +594,6 @@ namespace FESight
 			string output = "Debug: \n";
 
 			// Debug stuff!
-			output += Flags.ORequiredNumber;
 			// End debug stuff.
 
 			return output;
