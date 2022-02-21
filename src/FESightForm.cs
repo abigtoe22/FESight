@@ -599,9 +599,9 @@ namespace FESight
 				}
 			}
 
-			if (oAreaLabels.Where(p => p.LabelAdded).Any())
+			if (uAreaLabels.Where(p => p.LabelAdded).Any())
 			{
-				currentY = _uTrapChestHeight + _oTrapChestHeight + Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2;
+				currentY = _uTrapChestHeight + _oTrapChestHeight + Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 3;
 			}
 
 			List<TrapChestAreaLabel> mAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Moon).ToList();
@@ -617,7 +617,7 @@ namespace FESight
 				if (areaLabel.LabelAdded)
 				{
 					areaLabel.Label.Location = new Point(currentX, currentY);
-					currentY += Constants.TRAPS_HEIGHT;					
+					currentY += Constants.TRAPS_HEIGHT;
 				}
 			}
 		}
