@@ -90,7 +90,7 @@ namespace FESight
 			
 			Controls.Add(_objectivesLabel = new Label());
 			_objectivesLabel.AutoSize = true;
-			_objectivesLabel.Location = new Point(Constants.OBJECTIVES_START_COORDS_X, Constants.OBJECTIVES_START_COORDS_Y);
+			_objectivesLabel.Location = new Point(DPIScaleX(Constants.OBJECTIVES_START_COORDS_X), Constants.OBJECTIVES_START_COORDS_Y);
 			_objectivesLabel.ForeColor = Constants.FORM_FONT_COLOR;
 			_objectivesLabel.Font = Constants.FORM_FONT;
 			_objectivesLabel.Text = "Objectives:";
@@ -98,7 +98,7 @@ namespace FESight
 
 			Controls.Add(_locationsLabel = new Label());
 			_locationsLabel.AutoSize = true;
-			_locationsLabel.Location = new Point(Constants.LOCATIONS_START_COORD_X, Constants.LOCATIONS_START_COORD_Y);
+			_locationsLabel.Location = new Point(DPIScaleX(Constants.LOCATIONS_START_COORD_X), DPIScaleY(Constants.LOCATIONS_START_COORD_Y));
 			_locationsLabel.ForeColor = Constants.FORM_FONT_COLOR;
 			_locationsLabel.Font = Constants.FORM_FONT;
 			_locationsLabel.Text = "Locations";
@@ -449,8 +449,8 @@ namespace FESight
 				bool hasBeenChecked = location.HasBeenChecked(locFlags);
             }
 
-			int currentX = Constants.LOCATIONS_START_COORD_X;
-			int currentY = Constants.LOCATIONS_START_COORD_Y + Constants.LOCATIONS_LABEL_HEADING_PADDING;
+			int currentX = DPIScaleX(Constants.LOCATIONS_START_COORD_X);
+			int currentY = DPIScaleY(Constants.LOCATIONS_START_COORD_Y + Constants.LOCATIONS_LABEL_HEADING_PADDING);
 
 			List<KILocation> overworldLocations = KILocations.ListOfKILocations.Where
 			(
