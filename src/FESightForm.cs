@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BizHawk.Client.Common;
+using BizHawk.Client.EmuHawk;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,9 +8,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using BizHawk.Client.Common;
-using BizHawk.Client.EmuHawk;
-using Newtonsoft.Json;
 
 namespace FESight
 {
@@ -50,6 +49,13 @@ namespace FESight
 		private bool _hookCleared;
 		private bool _passObtained;
 
+		private float _dpiX;
+		private float _dpiY;
+		private float _dpiXRelative;
+		private float _dpiYRelative;
+		private int _dpiXPercent;
+		private int _dpiYPercent;
+
 		private readonly Label _debug;
 
 		internal ApiContainer APIs => _maybeAPIContainer!;
@@ -59,10 +65,26 @@ namespace FESight
 
         public FESightForm()
 		{
+			Graphics g = this.CreateGraphics();
+            try
+            {
+				_dpiX = g.DpiX;
+				_dpiY = g.DpiY;
+
+				_dpiXRelative = _dpiX / 96;
+				_dpiYRelative = _dpiY / 96;
+				_dpiXPercent = (int)(_dpiXRelative * 100);
+				_dpiYPercent = (int)(_dpiYRelative * 100);
+			}
+			finally
+            {
+				g.Dispose();
+            }
+
 			FESight.InitBeforeRomLoad();
 			InitKeyItemIcons();
 
-			ClientSize = new Size(Constants.CLIENT_SIZE_X, Constants.CLIENT_SIZE_Y);
+			ClientSize = new Size((int)(Constants.CLIENT_SIZE_X * _dpiXRelative), (int)(Constants.CLIENT_SIZE_Y * _dpiYRelative));
 			this.BackColor = System.Drawing.Color.FromArgb(0, 0, 99);
 			SuspendLayout();
 			
@@ -127,16 +149,17 @@ namespace FESight
 			_stopWatch = new Stopwatch();
 			Controls.Add(_stopWatchLabel = new Label());
 			_stopWatchLabel.AutoSize = true;
-			_stopWatchLabel.Location = new Point(10, ClientSize.Height - 110);
+			_stopWatchLabel.Location = new Point(DPIScaleY(10), ClientSize.Height - DPIScaleY(110));
 			_stopWatchLabel.ForeColor = Constants.FORM_FONT_COLOR;
 			_stopWatchLabel.Font = new Font(new FontFamily("Helvetica"), 40f);
 			_stopWatchLabel.Text = "0:00:00";
 
 			Controls.Add(_stopWatchStartButton = new Button());
-			_stopWatchStartButton.Location = new Point(_stopWatchLabel.Location.X, _stopWatchLabel.Location.Y + 70);
+			_stopWatchStartButton.Location = new Point(_stopWatchLabel.Location.X, _stopWatchLabel.Location.Y + DPIScaleY(70));
 			_stopWatchStartButton.Text = "Start";
 			_stopWatchStartButton.BackColor = Color.White;
-			_stopWatchStartButton.Width = 60;
+			_stopWatchStartButton.Width = DPIScaleX(60);
+			_stopWatchStartButton.AutoSize = true;
 			_stopWatchStartButton.Click += StartStopWatch;
 
 			Controls.Add(_stopWatchPauseButton = new Button());
@@ -144,6 +167,7 @@ namespace FESight
 			_stopWatchPauseButton.Text = "Pause";
 			_stopWatchPauseButton.BackColor = Color.White;
 			_stopWatchPauseButton.Width = _stopWatchStartButton.Width;
+			_stopWatchPauseButton.AutoSize = true;
 			_stopWatchPauseButton.Click += PauseStopWatch;
 
 			Controls.Add(_stopWatchRestartButton = new Button());
@@ -151,6 +175,7 @@ namespace FESight
 			_stopWatchRestartButton.Text = "Restart";
 			_stopWatchRestartButton.BackColor = Color.White;
 			_stopWatchRestartButton.Width = _stopWatchStartButton.Width;
+			_stopWatchRestartButton.AutoSize = true;
 			_stopWatchRestartButton.Click += RestartStopWatch;
 
 			Controls.Add(_dMistPictureBox = new PictureBox());
@@ -234,7 +259,7 @@ namespace FESight
 
 				foreach (var objective in metadata.objectives)
 				{
-					currentY += 20;
+					currentY += DPIScaleY(20);
 					CheckBox objectiveCheckbox = new CheckBox();
 
 					objectiveCheckbox.Enabled = false;
@@ -285,12 +310,12 @@ namespace FESight
 				_trapChestAreaLabels = new List<TrapChestAreaLabel>();
 				Controls.Add(_trapsLabel);
 
-				int currentTrapsX = Constants.TRAPS_START_COORD_X;
-				int currentTrapsY = Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING;
+				int currentTrapsX = DPIScaleX(Constants.TRAPS_START_COORD_X);
+				int currentTrapsY = DPIScaleX(Constants.TRAPS_START_COORD_Y) + DPIScaleY(Constants.TRAPS_LABEL_HEADING_PADDING);
 
 				foreach (var area in TrapChestAreas.GetOverworldTrapChests())
 				{
-					currentTrapsY += Constants.TRAPS_HEIGHT;
+					currentTrapsY += DPIScaleY(Constants.TRAPS_HEIGHT);
 					Label newLabel = new Label();
 					TrapChestAreaLabel areaLabel = new TrapChestAreaLabel(area, newLabel);
 					_trapChestAreaLabels.Add(new TrapChestAreaLabel(area, newLabel));
@@ -304,11 +329,11 @@ namespace FESight
 					newLabel.Click += (sender, e) => ClickTrapsLabel(areaLabel, sender, e);
 				}
 
-				currentTrapsY += Constants.TRAPS_LABEL_HEADING_PADDING;
+				currentTrapsY += DPIScaleY(Constants.TRAPS_LABEL_HEADING_PADDING);
 
 				foreach (var area in TrapChestAreas.GetUnderworldTrapChests())
                 {
-					currentTrapsY += Constants.TRAPS_HEIGHT;
+					currentTrapsY += DPIScaleY(Constants.TRAPS_HEIGHT);
 					Label newLabel = new Label();
 					TrapChestAreaLabel areaLabel = new TrapChestAreaLabel(area, newLabel);
 					_trapChestAreaLabels.Add(new TrapChestAreaLabel(area, newLabel));
@@ -322,11 +347,11 @@ namespace FESight
                     newLabel.Click += (sender, e) => ClickTrapsLabel(areaLabel, sender, e);
                 }
 
-				currentTrapsY += Constants.TRAPS_LABEL_HEADING_PADDING;
+				currentTrapsY += DPIScaleY(Constants.TRAPS_LABEL_HEADING_PADDING);
 
 				foreach (var area in TrapChestAreas.GetMoonTrapChests())
                 {
-					currentTrapsY += Constants.TRAPS_HEIGHT;
+					currentTrapsY += DPIScaleY(Constants.TRAPS_HEIGHT);
 					Label newLabel = new Label();
 					TrapChestAreaLabel areaLabel = new TrapChestAreaLabel(area, newLabel);
 					_trapChestAreaLabels.Add(new TrapChestAreaLabel(area, newLabel));
@@ -518,7 +543,7 @@ namespace FESight
 
 			if (Flags.Ktrap)
 			{
-				_trapsLabel.Location = new Point(Constants.TRAPS_START_COORD_X, Constants.TRAPS_START_COORD_Y);
+				_trapsLabel.Location = new Point(DPIScaleX(Constants.TRAPS_START_COORD_X), DPIScaleY(Constants.TRAPS_START_COORD_Y));
 				_trapsLabel.Text = "Trapped Chests";
 			}
 
@@ -556,8 +581,8 @@ namespace FESight
 
         private void UpdateTraps()
         {
-			int currentX = Constants.TRAPS_START_COORD_X;
-			int currentY = Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING + Constants.TRAPS_HEIGHT;
+			int currentX = DPIScaleX(Constants.TRAPS_START_COORD_X);
+			int currentY = DPIScaleY(Constants.TRAPS_START_COORD_Y + Constants.TRAPS_LABEL_HEADING_PADDING + Constants.TRAPS_HEIGHT);
 
 			List<TrapChestAreaLabel> oAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Overworld).ToList();
 			foreach (var areaLabel in oAreaLabels)
@@ -566,19 +591,19 @@ namespace FESight
 				{
 					Controls.Add(areaLabel.Label);
 					areaLabel.LabelAdded = true;
-					_oTrapChestHeight += Constants.TRAPS_HEIGHT;
+					_oTrapChestHeight += DPIScaleY(Constants.TRAPS_HEIGHT);
 				}
 
 				if(areaLabel.LabelAdded)
                 {
 					areaLabel.Label.Location = new Point(currentX, currentY);
-					currentY += Constants.TRAPS_HEIGHT;
+					currentY += DPIScaleY(Constants.TRAPS_HEIGHT);
 				}
 			}
 
 			if(oAreaLabels.Where(p => p.LabelAdded).Any())
             {				
-				currentY = _oTrapChestHeight + Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2;
+				currentY = _oTrapChestHeight + DPIScaleY(Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2);
 			}
 				
 
@@ -589,19 +614,19 @@ namespace FESight
 				{
 					Controls.Add(areaLabel.Label);
 					areaLabel.LabelAdded = true;
-					_uTrapChestHeight += Constants.TRAPS_HEIGHT;
+					_uTrapChestHeight += DPIScaleY(Constants.TRAPS_HEIGHT);
 				}
 
 				if (areaLabel.LabelAdded)
 				{
 					areaLabel.Label.Location = new Point(currentX, currentY);
-					currentY += Constants.TRAPS_HEIGHT;					
-				}
+                    currentY += DPIScaleY(Constants.TRAPS_HEIGHT);
+                }
 			}
 
 			if (uAreaLabels.Where(p => p.LabelAdded).Any())
 			{
-				currentY = _uTrapChestHeight + _oTrapChestHeight + Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 3;
+				currentY = _uTrapChestHeight + _oTrapChestHeight + DPIScaleY(Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 3);
 			}
 
 			List<TrapChestAreaLabel> mAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Moon).ToList();
@@ -611,13 +636,13 @@ namespace FESight
 				{
 					Controls.Add(areaLabel.Label);
 					areaLabel.LabelAdded = true;
-					_mTrapChestHeight += Constants.TRAPS_HEIGHT;
+					_mTrapChestHeight += DPIScaleY(Constants.TRAPS_HEIGHT);
 				}
 
 				if (areaLabel.LabelAdded)
 				{
 					areaLabel.Label.Location = new Point(currentX, currentY);
-					currentY += Constants.TRAPS_HEIGHT;
+					currentY += DPIScaleY(Constants.TRAPS_HEIGHT);
 				}
 			}
 		}
@@ -648,6 +673,12 @@ namespace FESight
 			string output = "Debug: \n";
 
 			// Debug stuff!
+			output += "DPI X: " + _dpiX;
+			output += "\nDPI Y: " + _dpiY;
+			output += "\nDPI X%: " + _dpiXPercent;
+			output += "\nDPI Y%: " + _dpiYPercent;
+			output += "\nDPI XRelative: " + _dpiXRelative;
+			output += "\nDPI YRelative: " + _dpiYRelative;
 			// End debug stuff.
 
 			return output;
@@ -704,6 +735,16 @@ namespace FESight
 				_passPictureBox.ImageLocation = Constants.ICON_LOCATION + "FFIVFE-Icons-2Pass-Gray.png";
 				_passObtained = false;
 			}
+		}
+
+		private int DPIScaleX(int number)
+		{
+			return (int)(number * _dpiXRelative);
+		}
+
+		private int DPIScaleY(int number)
+		{
+			return (int)(number * _dpiYRelative);
 		}
 
 		// Not used unless I decide to use the forms designer
