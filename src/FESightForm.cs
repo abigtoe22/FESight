@@ -238,7 +238,7 @@ namespace FESight
             }
         }
 
-		private void SetObjectiveCheckboxes(Metadata metadata)
+		private void SetUiElementsOnNewRom(Metadata metadata)
 		{
 			foreach (var objectiveCheckbox in _objectivesCheckboxes)
             {
@@ -304,11 +304,29 @@ namespace FESight
 				Controls.Remove(_dMistPictureBox);
             }
 
+			foreach (var label in _oTrapLabels)
+			{
+				Controls.Remove(label);
+			}
+			foreach (var label in _uTrapLabels)
+			{
+				Controls.Remove(label);
+			}
+			foreach (var label in _mTrapLabels)
+			{
+				Controls.Remove(label);
+			}
+
+
 			if (Flags.Ktrap)
             {
 				TrapChestAreas.ResetChestTotals();
 				_trapChestAreaLabels = new List<TrapChestAreaLabel>();
 				Controls.Add(_trapsLabel);
+
+				_oTrapChestHeight = 0;
+				_uTrapChestHeight = 0;
+				_mTrapChestHeight = 0;
 
 				int currentTrapsX = DPIScaleX(Constants.TRAPS_START_COORD_X);
 				int currentTrapsY = DPIScaleX(Constants.TRAPS_START_COORD_Y) + DPIScaleY(Constants.TRAPS_LABEL_HEADING_PADDING);
@@ -322,7 +340,6 @@ namespace FESight
 					_oTrapLabels.Add(newLabel);
 
 					areaLabel.UpdateLabelText();
-					newLabel.Location = new Point(currentTrapsX, currentTrapsY);
 					newLabel.Font = Constants.FORM_FONT;
 					newLabel.ForeColor = Constants.OVERWORLD_LOCATIONS_COLOR;
 					newLabel.AutoSize = true;
@@ -340,7 +357,6 @@ namespace FESight
 					_uTrapLabels.Add(newLabel);
 
 					areaLabel.UpdateLabelText();
-					newLabel.Location = new Point(currentTrapsX, currentTrapsY);
                     newLabel.Font = Constants.FORM_FONT;
                     newLabel.ForeColor = Constants.UNDERGROUND_LOCATIONS_COLOR;
                     newLabel.AutoSize = true;
@@ -358,7 +374,6 @@ namespace FESight
 					_mTrapLabels.Add(newLabel);
 
 					areaLabel.UpdateLabelText();
-					newLabel.Location = new Point(currentTrapsX, currentTrapsY);
 					newLabel.Font = Constants.FORM_FONT;
 					newLabel.ForeColor = Constants.MOON_LOCATIONS_COLOR;
 					newLabel.AutoSize = true;
@@ -407,8 +422,8 @@ namespace FESight
 			areaLabel.Area.Current--;
 			if (areaLabel.Area.Current < 0)
 				areaLabel.Area.Current = areaLabel.Area.Total;
-			
-			label.Text = areaLabel.Area.Name + String.Format(" [{0}/{1}]", areaLabel.Area.Current, areaLabel.Area.Total);
+
+			areaLabel.UpdateLabelText();
 		}
 
         private void UpdateKeyItems()
@@ -553,7 +568,7 @@ namespace FESight
 		private void InitializeOnRestartNewROM()
         {
 			FESight.InitOnRestartNewRom(APIs);
-			SetObjectiveCheckboxes(FESight.CurrentMetaData);
+			SetUiElementsOnNewRom(FESight.CurrentMetaData);
 		}
 
 		// Called after every frame
@@ -601,11 +616,7 @@ namespace FESight
 				}
 			}
 
-			if(oAreaLabels.Where(p => p.LabelAdded).Any())
-            {				
-				currentY = _oTrapChestHeight + DPIScaleY(Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2);
-			}
-				
+			currentY = _oTrapChestHeight + DPIScaleY(Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 2);				
 
 			List<TrapChestAreaLabel> uAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Underground).ToList();
 			foreach (var areaLabel in uAreaLabels)
@@ -624,10 +635,7 @@ namespace FESight
                 }
 			}
 
-			if (uAreaLabels.Where(p => p.LabelAdded).Any())
-			{
-				currentY = _uTrapChestHeight + _oTrapChestHeight + DPIScaleY(Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 3);
-			}
+			currentY = _uTrapChestHeight + _oTrapChestHeight + DPIScaleY(Constants.TRAPS_HEIGHT + Constants.TRAPS_LABEL_HEADING_PADDING * 3);
 
 			List<TrapChestAreaLabel> mAreaLabels = _trapChestAreaLabels.Where(p => p.Area.AreaMap == KILocationArea.Moon).ToList();
 			foreach (var areaLabel in mAreaLabels)
