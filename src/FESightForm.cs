@@ -574,24 +574,33 @@ namespace FESight
 		// Called after every frame
 		protected override void UpdateAfter()
 		{
-			if (APIs.Emulation.FrameCount() % 60 == 0)
-            {
-				FESight.InitBeforeAnyFrame(false);
-				UpdateDisplay();
-			}	
-		}
 
-		private void UpdateDisplay()
-        {
 #if DEBUG
 			_debug.Text = Debug();
 #endif
-			UpdateStopWatch();
-			UpdateKeyItems();
-			UpdateLocations();
-			UpdateObjectives();
-			if(Flags.Ktrap)
-				UpdateTraps();
+
+			if (APIs.Emulation.FrameCount() % 60 == 0)
+            {
+				FESight.InitBeforeAnyFrame(false);
+				UpdateStopWatch();
+			}
+			
+			if(APIs.Emulation.FrameCount() % 120 == 0)
+            {
+				UpdateKeyItems();
+			}
+			
+			if(APIs.Emulation.FrameCount() % 180 == 0)
+            {
+				UpdateLocations();
+				if (Flags.Ktrap)
+					UpdateTraps();
+			}
+			
+			if(APIs.Emulation.FrameCount() % 240 == 0)
+            {				
+				UpdateObjectives();
+			}
 		}
 
         private void UpdateTraps()
@@ -681,12 +690,7 @@ namespace FESight
 			string output = "Debug: \n";
 
 			// Debug stuff!
-			output += "DPI X: " + _dpiX;
-			output += "\nDPI Y: " + _dpiY;
-			output += "\nDPI X%: " + _dpiXPercent;
-			output += "\nDPI Y%: " + _dpiYPercent;
-			output += "\nDPI XRelative: " + _dpiXRelative;
-			output += "\nDPI YRelative: " + _dpiYRelative;
+			output += APIs.Emulation.FrameCount().ToString();
 			// End debug stuff.
 
 			return output;
